@@ -1,0 +1,3 @@
+"""
+IQ Tracker Backend Application.
+"""
