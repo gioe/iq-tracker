@@ -545,12 +545,12 @@ arbiters:
 - [x] **P1-001**: Create monorepo structure
 - [x] **P1-002**: Initialize git repository
 - [x] **P1-003**: Create project documentation (README, PLAN.md)
-- [ ] **P1-004**: Set up PostgreSQL database (local dev environment)
-- [ ] **P1-005**: Create database schema and migrations
-- [ ] **P1-006**: Set up Python virtual environment for backend
-- [ ] **P1-007**: Initialize FastAPI project structure
-- [ ] **P1-008**: Set up Python virtual environment for question-service
-- [ ] **P1-009**: Create Xcode project for iOS app
+- [x] **P1-004**: Set up PostgreSQL database (local dev environment)
+- [x] **P1-005**: Create database schema and migrations
+- [x] **P1-006**: Set up Python virtual environment for backend
+- [x] **P1-007**: Initialize FastAPI project structure
+- [x] **P1-008**: Set up Python virtual environment for question-service
+- [x] **P1-009**: Create Xcode project for iOS app
 - [ ] **P1-010**: Configure development environment documentation
 - [ ] **P1-011**: Set up pre-commit hooks for backend (black, flake8, mypy)
 - [ ] **P1-012**: Set up pre-commit hooks for iOS (SwiftLint, SwiftFormat)
@@ -731,13 +731,18 @@ arbiters:
 ### Current Status
 
 **Completed:**
-- ✅ P1-001, P1-002, P1-003 (Monorepo structure and documentation)
+- ✅ P1-001 through P1-009 (Infrastructure and scaffolding)
+  - Monorepo structure and documentation
+  - PostgreSQL database setup with schema and migrations
+  - Python virtual environments for backend and question-service
+  - FastAPI project structure initialized
+  - Xcode iOS project created
 
 **In Progress:**
-- Phase 1: Database and project scaffolding
+- Phase 1: Completing remaining infrastructure tasks (pre-commit hooks, CI/CD)
 
 **Next Steps:**
-- Complete Phase 1 infrastructure setup
+- Complete P1-010 through P1-014 (documentation, linting, CI/CD)
 - Begin Phase 2 (Backend API) and Phase 3 (iOS app) in parallel
 
 ---
@@ -958,15 +963,17 @@ When new tasks are identified:
 2. Start work on a task (e.g., P2-003)
 3. Create feature branch from updated main: `git checkout -b feature/P2-003-jwt-auth`
 4. Make multiple commits as needed (atomic, logical commits)
-5. Push branch to GitHub
-6. Create Pull Request
-7. PR gets reviewed on GitHub (async)
-8. Address feedback if needed
-9. Merge to `main` after approval
-10. Update PLAN.md to check off task: `- [x] P2-003`
+5. **Final commit: Update PLAN.md to check off task:** `- [x] P2-003`
+6. Push branch to GitHub
+7. Create Pull Request
+8. PR gets reviewed on GitHub (async)
+9. Address feedback if needed (additional commits are fine)
+10. Merge to `main` after approval
 11. Delete feature branch
 
 **IMPORTANT:** Always ensure you've pulled the latest changes from main before creating a new feature branch. This prevents merge conflicts from working on outdated code.
+
+**Why update PLAN.md before the PR?** This ensures the work and status update merge together atomically. The checkbox in `main` always accurately reflects what's actually been completed and merged.
 
 **Multiple commits per task:** Encouraged! Break work into logical, atomic commits within a feature branch.
 
@@ -1095,7 +1102,7 @@ Before approving a PR, verify:
 - [ ] Code is readable and maintainable
 - [ ] No sensitive data (API keys, passwords) committed
 - [ ] Documentation updated if needed (README, API docs)
-- [ ] PLAN.md checkbox will be updated after merge
+- [ ] PLAN.md checkbox is checked off in the PR
 
 ---
 
