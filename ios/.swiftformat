@@ -1,0 +1,34 @@
+# SwiftFormat configuration file
+# https://github.com/nicklockwood/SwiftFormat
+
+# File options
+--exclude Pods,.build,DerivedData,IQTracker.xcodeproj
+
+# Format options
+--indent 4
+--indentcase false
+--trimwhitespace always
+--commas always
+--decimalgrouping 3,6
+--exponentcase lowercase
+--fractiongrouping disabled
+--hexgrouping 4,8
+--hexliteralcase uppercase
+--linebreaks lf
+--octalgrouping 4,8
+--operatorfunc spaced
+--semicolons inline
+--swiftversion 5.9
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+
+# Enabled rules
+--enable isEmpty
+--enable sortImports
+--enable blankLinesBetweenScopes
+--enable consecutiveSpaces
+
+# Disabled rules
+--disable andOperator
+--disable wrapMultilineStatementBraces
