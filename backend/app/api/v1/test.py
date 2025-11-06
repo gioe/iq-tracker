@@ -425,8 +425,9 @@ def get_test_result(
         )
 
     # Calculate accuracy percentage
-    accuracy_percentage = (
-        (test_result.correct_answers / test_result.total_questions) * 100
+    accuracy_percentage: float = (
+        (float(test_result.correct_answers) / float(test_result.total_questions))
+        * 100.0
         if test_result.total_questions > 0
         else 0.0
     )
@@ -474,8 +475,9 @@ def get_test_history(
     # Convert to response format
     results_response = []
     for test_result in test_results:
-        accuracy_percentage = (
-            (test_result.correct_answers / test_result.total_questions) * 100
+        accuracy_percentage: float = (
+            (float(test_result.correct_answers) / float(test_result.total_questions))
+            * 100.0
             if test_result.total_questions > 0
             else 0.0
         )
