@@ -570,7 +570,7 @@ arbiters:
 - [x] **P2-002**: Set up Alembic for database migrations
 - [x] **P2-003**: Implement user authentication (JWT + Bcrypt)
 - [x] **P2-004**: Build auth endpoints (register, login, refresh, logout)
-- [ ] **P2-005**: Implement user profile endpoints (GET, PUT)
+- [x] **P2-005**: Implement user profile endpoints (GET, PUT)
 - [ ] **P2-006**: Build question serving logic (filter unseen questions)
 - [ ] **P2-007**: Implement test session management
 - [ ] **P2-008**: Build response submission endpoint

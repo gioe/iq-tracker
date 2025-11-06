@@ -56,3 +56,17 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True  # Allows conversion from ORM models
+
+
+class UserProfileUpdate(BaseModel):
+    """Schema for updating user profile."""
+
+    first_name: Optional[str] = Field(
+        None, min_length=1, max_length=100, description="User first name"
+    )
+    last_name: Optional[str] = Field(
+        None, min_length=1, max_length=100, description="User last name"
+    )
+    notification_enabled: Optional[bool] = Field(
+        None, description="Push notification preference"
+    )
