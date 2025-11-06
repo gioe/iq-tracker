@@ -3,8 +3,7 @@ Question serving endpoints for IQ tests.
 """
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, not_, exists
-from typing import List
+from sqlalchemy import select, and_
 
 from app.models import get_db, User, Question, UserQuestion
 from app.schemas.questions import QuestionResponse, UnseenQuestionsResponse
@@ -44,9 +43,9 @@ def get_unseen_questions(
     """
     # Subquery to get question IDs the user has already seen
     seen_question_ids = (
-        db.query(UserQuestion.question_id)
-        .filter(UserQuestion.user_id == current_user.id)
-        .subquery()
+        select(UserQuestion.question_id)
+        .where(UserQuestion.user_id == current_user.id)
+        .scalar_subquery()
     )
 
     # Query for active questions the user hasn't seen
@@ -76,15 +75,9 @@ def get_unseen_questions(
         )
 
     # Convert to response schema (which excludes correct_answer and sensitive fields)
+    # Use Pydantic's model_validate with from_attributes=True, then override explanation
     questions_response = [
-        QuestionResponse(
-            id=q.id,
-            question_text=q.question_text,
-            question_type=q.question_type.value,
-            difficulty_level=q.difficulty_level.value,
-            answer_options=q.answer_options,
-            explanation=None,  # Don't return explanation until after submission
-        )
+        QuestionResponse.model_validate(q).model_copy(update={"explanation": None})
         for q in unseen_questions
     ]
 

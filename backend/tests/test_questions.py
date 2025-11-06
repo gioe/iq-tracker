@@ -1,7 +1,6 @@
 """
 Tests for question serving endpoints.
 """
-import pytest
 
 
 class TestGetUnseenQuestions:
@@ -9,9 +8,7 @@ class TestGetUnseenQuestions:
 
     def test_get_unseen_questions_success(self, client, auth_headers, test_questions):
         """Test successfully fetching unseen questions."""
-        response = client.get(
-            "/v1/questions/unseen?count=3", headers=auth_headers
-        )
+        response = client.get("/v1/questions/unseen?count=3", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -57,9 +54,7 @@ class TestGetUnseenQuestions:
         self, client, auth_headers, test_questions
     ):
         """Test that inactive questions are not returned."""
-        response = client.get(
-            "/v1/questions/unseen?count=10", headers=auth_headers
-        )
+        response = client.get("/v1/questions/unseen?count=10", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -78,9 +73,7 @@ class TestGetUnseenQuestions:
         # Mark first two questions as seen (indices 0 and 1)
         mark_questions_seen([0, 1])
 
-        response = client.get(
-            "/v1/questions/unseen?count=10", headers=auth_headers
-        )
+        response = client.get("/v1/questions/unseen?count=10", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -118,28 +111,20 @@ class TestGetUnseenQuestions:
     ):
         """Test count parameter validation."""
         # Test count = 0 (below minimum)
-        response = client.get(
-            "/v1/questions/unseen?count=0", headers=auth_headers
-        )
+        response = client.get("/v1/questions/unseen?count=0", headers=auth_headers)
         assert response.status_code == 422  # Validation error
 
         # Test count = 101 (above maximum)
-        response = client.get(
-            "/v1/questions/unseen?count=101", headers=auth_headers
-        )
+        response = client.get("/v1/questions/unseen?count=101", headers=auth_headers)
         assert response.status_code == 422  # Validation error
 
         # Test count = 1 (valid minimum)
-        response = client.get(
-            "/v1/questions/unseen?count=1", headers=auth_headers
-        )
+        response = client.get("/v1/questions/unseen?count=1", headers=auth_headers)
         assert response.status_code == 200
         assert response.json()["total_count"] == 1
 
         # Test count = 100 (valid maximum)
-        response = client.get(
-            "/v1/questions/unseen?count=100", headers=auth_headers
-        )
+        response = client.get("/v1/questions/unseen?count=100", headers=auth_headers)
         assert response.status_code == 200
         # Should return 4 (all available active questions)
         assert response.json()["total_count"] == 4
@@ -183,9 +168,11 @@ class TestGetUnseenQuestions:
         # Get test user ID from the database
         from app.models import User as UserModel
 
-        test_user = db_session.query(UserModel).filter(
-            UserModel.email == "test@example.com"
-        ).first()
+        test_user = (
+            db_session.query(UserModel)
+            .filter(UserModel.email == "test@example.com")
+            .first()
+        )
 
         # First user should see only 2 unseen questions
         user1_token = create_access_token({"user_id": test_user.id})
@@ -209,9 +196,7 @@ class TestGetUnseenQuestions:
         self, client, auth_headers, test_questions
     ):
         """Test that response format matches schema."""
-        response = client.get(
-            "/v1/questions/unseen?count=1", headers=auth_headers
-        )
+        response = client.get("/v1/questions/unseen?count=1", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -238,9 +223,7 @@ class TestGetUnseenQuestions:
         self, client, auth_headers, test_questions
     ):
         """Test that various question types are returned correctly."""
-        response = client.get(
-            "/v1/questions/unseen?count=10", headers=auth_headers
-        )
+        response = client.get("/v1/questions/unseen?count=10", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -258,9 +241,7 @@ class TestGetUnseenQuestions:
         self, client, auth_headers, test_questions
     ):
         """Test that various difficulty levels are returned correctly."""
-        response = client.get(
-            "/v1/questions/unseen?count=10", headers=auth_headers
-        )
+        response = client.get("/v1/questions/unseen?count=10", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
