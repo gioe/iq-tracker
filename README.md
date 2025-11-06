@@ -61,6 +61,8 @@ See **[DEVELOPMENT.md](DEVELOPMENT.md)** for:
 
 For project planning and task tracking, see **[PLAN.md](PLAN.md)**
 
+For extracting reusable components for future projects, see **[REUSABLE_COMPONENTS_PLAN.md](REUSABLE_COMPONENTS_PLAN.md)**
+
 ## Deployment
 
 (Deployment instructions to be added)
