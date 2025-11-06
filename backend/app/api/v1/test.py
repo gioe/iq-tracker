@@ -15,6 +15,7 @@ from app.schemas.test_sessions import (
     TestSessionStatusResponse,
 )
 from app.schemas.questions import QuestionResponse
+from app.schemas.responses import ResponseSubmission, SubmitTestResponse
 from app.core.auth import get_current_user
 
 router = APIRouter()
@@ -69,7 +70,7 @@ def start_test(
     seen_question_ids = (
         select(UserQuestion.question_id)  # type: ignore[arg-type]
         .where(UserQuestion.user_id == current_user.id)
-        .scalar_subquery()
+        .scalar_subquery()  # type: ignore[attr-defined]
     )
 
     unseen_questions = (
@@ -208,4 +209,133 @@ def get_active_test_session(
     return TestSessionStatusResponse(
         session=TestSessionResponse.model_validate(active_session),
         questions_count=questions_count,
+    )
+
+
+@router.post("/submit", response_model=SubmitTestResponse)
+def submit_test(
+    submission: ResponseSubmission,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Submit responses for a test session.
+
+    Validates and stores all user responses, compares them against correct
+    answers, and marks the test session as completed.
+
+    Args:
+        submission: Response submission with session_id and responses
+        current_user: Current authenticated user
+        db: Database session
+
+    Returns:
+        Submission confirmation with updated session details
+
+    Raises:
+        HTTPException: If session not found, not authorized, already completed,
+                      or validation fails
+    """
+    from app.models.models import Response
+
+    # Fetch the test session
+    test_session = (
+        db.query(TestSession).filter(TestSession.id == submission.session_id).first()
+    )
+
+    if not test_session:
+        raise HTTPException(status_code=404, detail="Test session not found")
+
+    # Verify session belongs to current user
+    if test_session.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="Not authorized to submit for this test session"
+        )
+
+    # Verify session is still in progress
+    if test_session.status != TestStatus.IN_PROGRESS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Test session is already {test_session.status.value}. "
+            "Cannot submit responses for a completed or abandoned session.",
+        )
+
+    # Validate that responses list is not empty
+    if not submission.responses:
+        raise HTTPException(status_code=400, detail="Response list cannot be empty")
+
+    # Fetch all questions that were part of this test session
+    # (questions seen by user at the time of session start)
+    session_question_ids = (
+        db.query(UserQuestion.question_id)
+        .filter(
+            UserQuestion.user_id == current_user.id,
+            UserQuestion.seen_at >= test_session.started_at,
+        )
+        .all()
+    )
+    valid_question_ids = {q_id for (q_id,) in session_question_ids}
+
+    # Validate all question_ids in submission belong to this session
+    submitted_question_ids = {resp.question_id for resp in submission.responses}
+    invalid_questions = submitted_question_ids - valid_question_ids
+
+    if invalid_questions:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid question IDs: {invalid_questions}. "
+            "These questions do not belong to this test session.",
+        )
+
+    # Fetch questions to compare answers
+    questions = db.query(Question).filter(Question.id.in_(submitted_question_ids)).all()
+    questions_dict = {q.id: q for q in questions}
+
+    # Process each response
+    response_count = 0
+    for resp_item in submission.responses:
+        # Validate user_answer is not empty
+        if not resp_item.user_answer or not resp_item.user_answer.strip():
+            raise HTTPException(
+                status_code=400,
+                detail=f"User answer for question {resp_item.question_id} cannot be empty",
+            )
+
+        question = questions_dict.get(resp_item.question_id)  # type: ignore[call-overload]
+        if not question:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Question {resp_item.question_id} not found",
+            )
+
+        # Compare user answer with correct answer (case-insensitive)
+        is_correct = (
+            resp_item.user_answer.strip().lower()
+            == question.correct_answer.strip().lower()
+        )
+
+        # Create Response record
+        response = Response(
+            test_session_id=test_session.id,
+            user_id=current_user.id,
+            question_id=resp_item.question_id,
+            user_answer=resp_item.user_answer.strip(),
+            is_correct=is_correct,
+            answered_at=datetime.utcnow(),
+        )
+        db.add(response)
+        response_count += 1
+
+    # Update test session status to completed
+    test_session.status = TestStatus.COMPLETED  # type: ignore[assignment]
+    test_session.completed_at = datetime.utcnow()  # type: ignore[assignment]
+
+    # Commit all changes in a single transaction
+    db.commit()
+    db.refresh(test_session)
+
+    return SubmitTestResponse(
+        session=TestSessionResponse.model_validate(test_session),
+        responses_count=response_count,
+        message=f"Successfully submitted {response_count} responses",
     )
