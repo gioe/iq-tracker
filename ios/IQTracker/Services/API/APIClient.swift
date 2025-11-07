@@ -56,20 +56,46 @@ enum APIEndpoint {
 
 /// Main API client implementation
 class APIClient: APIClientProtocol {
+    /// Shared singleton instance
+    static let shared = APIClient(
+        baseURL: AppConfig.apiBaseURL,
+        retryPolicy: .default
+    )
+
     private let baseURL: URL
     private let session: URLSession
     private var authToken: String?
+    private var interceptors: [RequestInterceptor]
+    private let retryExecutor: RetryExecutor
+    private let requestTimeout: TimeInterval
 
-    init(baseURL: String, session: URLSession = .shared) {
+    init(
+        baseURL: String,
+        session: URLSession = .shared,
+        retryPolicy: RetryPolicy = .default,
+        requestTimeout: TimeInterval = 30.0
+    ) {
         guard let url = URL(string: baseURL) else {
             fatalError("Invalid base URL: \(baseURL)")
         }
         self.baseURL = url
         self.session = session
+        self.requestTimeout = requestTimeout
+        retryExecutor = RetryExecutor(policy: retryPolicy)
+
+        // Set up default interceptors
+        interceptors = [
+            ConnectivityInterceptor(),
+            LoggingInterceptor()
+        ]
     }
 
     func setAuthToken(_ token: String?) {
         authToken = token
+    }
+
+    func addInterceptor(_ interceptor: RequestInterceptor) {
+        interceptors.append(interceptor)
     }
 
     func request<T: Decodable>(
@@ -78,20 +104,48 @@ class APIClient: APIClientProtocol {
         body: Encodable? = nil,
         requiresAuth: Bool = true
     ) async throws -> T {
-        let urlRequest = try buildRequest(
+        // Use retry executor for resilient requests
+        try await retryExecutor.execute {
+            try await self.performRequest(
+                endpoint: endpoint,
+                method: method,
+                body: body,
+                requiresAuth: requiresAuth
+            )
+        }
+    }
+
+    private func performRequest<T: Decodable>(
+        endpoint: APIEndpoint,
+        method: HTTPMethod,
+        body: Encodable?,
+        requiresAuth: Bool
+    ) async throws -> (T, HTTPURLResponse) {
+        var urlRequest = try buildRequest(
             endpoint: endpoint,
             method: method,
             body: body,
             requiresAuth: requiresAuth
         )
 
+        // Apply interceptors
+        for interceptor in interceptors {
+            urlRequest = try await interceptor.intercept(urlRequest)
+        }
+
+        // Perform request
         let (data, response) = try await session.data(for: urlRequest)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
         }
 
-        return try handleResponse(data: data, statusCode: httpResponse.statusCode)
+        // Log response
+        NetworkLogger.shared.logResponse(httpResponse, data: data)
+
+        // Handle response
+        let result: T = try handleResponse(data: data, statusCode: httpResponse.statusCode)
+        return (result, httpResponse)
     }
 
     private func buildRequest(
@@ -106,14 +160,19 @@ class APIClient: APIClientProtocol {
 
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
+        request.timeoutInterval = requestTimeout
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("iOS", forHTTPHeaderField: "X-Platform")
+        request.setValue(AppConfig.appVersion, forHTTPHeaderField: "X-App-Version")
 
         if requiresAuth, let token = authToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
         if let body {
-            request.httpBody = try JSONEncoder().encode(body)
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            request.httpBody = try encoder.encode(body)
         }
 
         return request
