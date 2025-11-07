@@ -1,0 +1,38 @@
+import SwiftUI
+
+/// A reusable primary action button with consistent styling
+struct PrimaryButton: View {
+    let title: String
+    let action: () -> Void
+    var isLoading: Bool = false
+    var isDisabled: Bool = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(0.8)
+                }
+                Text(title)
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+            }
+            .padding()
+            .background(isDisabled ? Color.gray : Color.accentColor)
+            .foregroundColor(.white)
+            .cornerRadius(12)
+        }
+        .disabled(isDisabled || isLoading)
+    }
+}
+
+#Preview {
+    VStack(spacing: 20) {
+        PrimaryButton(title: "Sign In", action: {})
+        PrimaryButton(title: "Loading...", action: {}, isLoading: true)
+        PrimaryButton(title: "Disabled", action: {}, isDisabled: true)
+    }
+    .padding()
+}
