@@ -16,6 +16,7 @@
 		463B6496D534272DE2DB6125 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032F8945603646E89A4C0F12 /* ContentView.swift */; };
 		4B51F0984F8C3838F4E8EFA5 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C3B19EAE46533063BDD9DAF /* CustomTextField.swift */; };
 		4F161655DD9EDF1D39132FE6 /* AuthServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7BCB4CC05FA692DC3EE511 /* AuthServiceProtocol.swift */; };
+		530531E24E0ACE60A41AC0CC /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D44EA52AA38A090775DF762 /* LoginViewModel.swift */; };
 		6A8E2C9A29244DF090FF95E4 /* Validators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434B6F6E612E8135BEB9EF58 /* Validators.swift */; };
 		6DF5EFD0C18FAE3A2ABE79D7 /* TokenRefreshInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C64FE278A925F2286ADD61B2 /* TokenRefreshInterceptor.swift */; };
 		839DA70AA82533D50930E73F /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5417B4CD26041562A41E46B /* String+Extensions.swift */; };
@@ -28,6 +29,7 @@
 		95C81A1F6CCE0B3C5FB3D25E /* ViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565BB90693929F5317496786 /* ViewModelProtocol.swift */; };
 		96C201B39BD49675D938708E /* Question.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EFDBB8E31CBDCB816DDF108 /* Question.swift */; };
 		9ECF18887ECC57B03496959F /* View+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5261BFE90E4BE297C8F4D661 /* View+Extensions.swift */; };
+		A456DCF6620AFC49DC1594E7 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511F20E653108CE007281485 /* WelcomeView.swift */; };
 		AE2042EC9205E1ABCDEA4990 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1CED6BD6ED806B6CE39A12D8 /* SwiftUI.framework */; };
 		AE62AA3C08E95DB228CACE7F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A0B3336ACC1395A6017781A /* Assets.xcassets */; };
 		B21BA9DD4167BDF1852D1EC8 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1A0D7C2A77C6D1B6AFAC46 /* AppConfig.swift */; };
@@ -54,6 +56,7 @@
 		393F8818483E0E7701A1A328 /* MockAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAPIClient.swift; sourceTree = "<group>"; };
 		3E09B407D867D4141B0DAB81 /* KeychainStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorage.swift; sourceTree = "<group>"; };
 		434B6F6E612E8135BEB9EF58 /* Validators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Validators.swift; sourceTree = "<group>"; };
+		511F20E653108CE007281485 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		5261BFE90E4BE297C8F4D661 /* View+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extensions.swift"; sourceTree = "<group>"; };
 		565BB90693929F5317496786 /* ViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModelProtocol.swift; sourceTree = "<group>"; };
 		5797E5D16A75977F1346CB94 /* BaseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseViewModel.swift; sourceTree = "<group>"; };
@@ -69,6 +72,7 @@
 		89F7CBB463D9BFE8517D7F21 /* Date+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extensions.swift"; sourceTree = "<group>"; };
 		8E7BCB4CC05FA692DC3EE511 /* AuthServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthServiceProtocol.swift; sourceTree = "<group>"; };
 		9AA15DF43B47008B21D0BCF9 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
+		9D44EA52AA38A090775DF762 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		A60BF6153CD6BF7A06AAD263 /* RequestInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestInterceptor.swift; sourceTree = "<group>"; };
 		B5417B4CD26041562A41E46B /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
 		B67FA448BFAB112EAB0F5C41 /* IQTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IQTrackerApp.swift; sourceTree = "<group>"; };
@@ -125,6 +129,7 @@
 		2435EBB8ED00DA11629F1B10 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				331B82549E5F951AE4F21997 /* Auth */,
 				8F2E6D36A26ACC6EFAF5833C /* Common */,
 			);
 			path = Views;
@@ -134,9 +139,18 @@
 			isa = PBXGroup;
 			children = (
 				5797E5D16A75977F1346CB94 /* BaseViewModel.swift */,
+				9D44EA52AA38A090775DF762 /* LoginViewModel.swift */,
 				565BB90693929F5317496786 /* ViewModelProtocol.swift */,
 			);
 			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		331B82549E5F951AE4F21997 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				511F20E653108CE007281485 /* WelcomeView.swift */,
+			);
+			path = Auth;
 			sourceTree = "<group>";
 		};
 		3C23018FF6613F589AA02CEB /* Products */ = {
@@ -326,6 +340,7 @@
 				BB0A35ADCC8900F61FF3AA69 /* IQTrackerApp.swift in Sources */,
 				91429C7C16E238E0C072F0E3 /* KeychainStorage.swift in Sources */,
 				351F95043E2BEBB36F24E35F /* LoadingView.swift in Sources */,
+				530531E24E0ACE60A41AC0CC /* LoginViewModel.swift in Sources */,
 				12E5E143015C1776441F6F5F /* MockAPIClient.swift in Sources */,
 				2C95FEDE80C248AF74AFA03D /* NetworkLogger.swift in Sources */,
 				89481B3B3B6250D18FB1CBCF /* NetworkMonitor.swift in Sources */,
@@ -342,6 +357,7 @@
 				6A8E2C9A29244DF090FF95E4 /* Validators.swift in Sources */,
 				9ECF18887ECC57B03496959F /* View+Extensions.swift in Sources */,
 				95C81A1F6CCE0B3C5FB3D25E /* ViewModelProtocol.swift in Sources */,
+				A456DCF6620AFC49DC1594E7 /* WelcomeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
