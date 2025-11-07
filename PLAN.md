@@ -591,7 +591,7 @@ arbiters:
 
 **Tasks:**
 - [x] **P3-001**: Set up MVVM architecture structure
-- [ ] **P3-002**: Create networking layer (API client)
+- [x] **P3-002**: Create networking layer (API client)
 - [ ] **P3-003**: Implement authentication service
 - [ ] **P3-004**: Build Welcome/Login screen
 - [ ] **P3-005**: Build Registration screen

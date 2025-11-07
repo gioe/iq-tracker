@@ -8,7 +8,7 @@
 --indent 4
 --indentcase false
 --trimwhitespace always
---commas always
+--commas inline
 --decimalgrouping 3,6
 --exponentcase lowercase
 --fractiongrouping disabled
