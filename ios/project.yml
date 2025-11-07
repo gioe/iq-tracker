@@ -27,3 +27,19 @@ targets:
       ENABLE_PREVIEWS: YES
     dependencies:
       - sdk: SwiftUI.framework
+
+schemes:
+  IQTracker:
+    build:
+      targets:
+        IQTracker: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

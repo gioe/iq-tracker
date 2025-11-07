@@ -593,7 +593,7 @@ arbiters:
 - [x] **P3-001**: Set up MVVM architecture structure
 - [x] **P3-002**: Create networking layer (API client)
 - [x] **P3-003**: Implement authentication service
-- [ ] **P3-004**: Build Welcome/Login screen
+- [x] **P3-004**: Build Welcome/Login screen
 - [ ] **P3-005**: Build Registration screen
 - [x] **P3-006**: Implement secure token storage (Keychain)
 - [ ] **P3-007**: Create main navigation structure
