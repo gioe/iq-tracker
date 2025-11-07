@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 
 /// Base class for ViewModels providing common functionality
 class BaseViewModel: ObservableObject {
@@ -12,17 +12,17 @@ class BaseViewModel: ObservableObject {
 
     /// Handle errors and set them for display
     func handleError(_ error: Error) {
-        self.isLoading = false
+        isLoading = false
         self.error = error
     }
 
     /// Clear any existing error
     func clearError() {
-        self.error = nil
+        error = nil
     }
 
     /// Set loading state
     func setLoading(_ loading: Bool) {
-        self.isLoading = loading
+        isLoading = loading
     }
 }

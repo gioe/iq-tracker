@@ -11,7 +11,7 @@ extension String {
     /// Check if string meets password requirements
     var isValidPassword: Bool {
         // At least 8 characters
-        return count >= 8
+        count >= 8
     }
 
     /// Check if string is not empty (ignoring whitespace)

@@ -14,23 +14,23 @@ enum APIError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "Invalid URL"
+            "Invalid URL"
         case .invalidResponse:
-            return "Invalid response from server"
+            "Invalid response from server"
         case .unauthorized:
-            return "Unauthorized. Please log in again."
+            "Unauthorized. Please log in again."
         case .forbidden:
-            return "Access forbidden"
+            "Access forbidden"
         case .notFound:
-            return "Resource not found"
-        case .serverError(let statusCode):
-            return "Server error (code: \(statusCode))"
-        case .decodingError(let error):
-            return "Failed to decode response: \(error.localizedDescription)"
-        case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
+            "Resource not found"
+        case let .serverError(statusCode):
+            "Server error (code: \(statusCode))"
+        case let .decodingError(error):
+            "Failed to decode response: \(error.localizedDescription)"
+        case let .networkError(error):
+            "Network error: \(error.localizedDescription)"
         case .unknown:
-            return "An unknown error occurred"
+            "An unknown error occurred"
         }
     }
 }

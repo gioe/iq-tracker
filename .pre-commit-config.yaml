@@ -1,0 +1,111 @@
+repos:
+  # General file checks (apply to all files)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+
+  # ============================================
+  # Backend Python Hooks
+  # ============================================
+
+  # Black code formatting (backend only)
+  - repo: https://github.com/psf/black
+    rev: 23.11.0
+    hooks:
+      - id: black
+        name: black (backend)
+        files: ^backend/.*\.py$
+
+  # Flake8 linting (backend only)
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        name: flake8 (backend)
+        files: ^backend/.*\.py$
+        additional_dependencies: [flake8-docstrings]
+        args: [
+          '--max-line-length=88',
+          '--extend-ignore=E203,W503,E501,D100,D101,D102,D103,D104,D105,D200,D202,D204,D205,D400,D401',
+          '--per-file-ignores=__init__.py:F401'
+        ]
+        exclude: ^backend/alembic/
+
+  # MyPy type checking (backend only)
+  - repo: local
+    hooks:
+      - id: mypy-backend
+        name: mypy (backend)
+        entry: bash -c 'cd backend && source venv/bin/activate && mypy app/ --config-file=pyproject.toml'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+
+  # ============================================
+  # Question Service Python Hooks
+  # ============================================
+
+  # Black code formatting (question-service only)
+  - repo: https://github.com/psf/black
+    rev: 23.11.0
+    hooks:
+      - id: black
+        name: black (question-service)
+        files: ^question-service/.*\.py$
+
+  # Flake8 linting (question-service only)
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        name: flake8 (question-service)
+        files: ^question-service/.*\.py$
+        additional_dependencies: [flake8-docstrings]
+        args: [
+          '--max-line-length=88',
+          '--extend-ignore=E203,W503,E501,D100,D101,D102,D103,D104,D105,D200,D202,D204,D205,D400,D401',
+          '--per-file-ignores=__init__.py:F401'
+        ]
+
+  # MyPy type checking (question-service only)
+  - repo: local
+    hooks:
+      - id: mypy-question-service
+        name: mypy (question-service)
+        entry: bash -c 'cd question-service && source venv/bin/activate && mypy src/ --config-file=pyproject.toml'
+        language: system
+        files: ^question-service/.*\.py$
+        pass_filenames: false
+
+  # ============================================
+  # iOS Swift Hooks
+  # ============================================
+
+  # SwiftLint (iOS only)
+  - repo: local
+    hooks:
+      - id: swiftlint
+        name: SwiftLint
+        entry: swiftlint lint --strict --config ios/.swiftlint.yml
+        language: system
+        files: ^ios/.*\.swift$
+        types: [file, swift]
+
+  # SwiftFormat (iOS only)
+  - repo: local
+    hooks:
+      - id: swiftformat
+        name: SwiftFormat
+        entry: swiftformat --config ios/.swiftformat
+        language: system
+        files: ^ios/.*\.swift$
+        types: [file, swift]

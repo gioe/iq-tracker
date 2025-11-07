@@ -33,23 +33,23 @@ enum APIEndpoint {
     var path: String {
         switch self {
         case .register:
-            return "/v1/auth/register"
+            "/v1/auth/register"
         case .login:
-            return "/v1/auth/login"
+            "/v1/auth/login"
         case .refreshToken:
-            return "/v1/auth/refresh"
+            "/v1/auth/refresh"
         case .logout:
-            return "/v1/auth/logout"
+            "/v1/auth/logout"
         case .userProfile:
-            return "/v1/user/profile"
+            "/v1/user/profile"
         case .testStart:
-            return "/v1/test/start"
+            "/v1/test/start"
         case .testSubmit:
-            return "/v1/test/submit"
-        case .testResults(let testId):
-            return "/v1/test/results/\(testId)"
+            "/v1/test/submit"
+        case let .testResults(testId):
+            "/v1/test/results/\(testId)"
         case .testHistory:
-            return "/v1/test/history"
+            "/v1/test/history"
         }
     }
 }
@@ -69,7 +69,7 @@ class APIClient: APIClientProtocol {
     }
 
     func setAuthToken(_ token: String?) {
-        self.authToken = token
+        authToken = token
     }
 
     func request<T: Decodable>(
@@ -78,6 +78,28 @@ class APIClient: APIClientProtocol {
         body: Encodable? = nil,
         requiresAuth: Bool = true
     ) async throws -> T {
+        let urlRequest = try buildRequest(
+            endpoint: endpoint,
+            method: method,
+            body: body,
+            requiresAuth: requiresAuth
+        )
+
+        let (data, response) = try await session.data(for: urlRequest)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+
+        return try handleResponse(data: data, statusCode: httpResponse.statusCode)
+    }
+
+    private func buildRequest(
+        endpoint: APIEndpoint,
+        method: HTTPMethod,
+        body: Encodable?,
+        requiresAuth: Bool
+    ) throws -> URLRequest {
         guard let url = URL(string: endpoint.path, relativeTo: baseURL) else {
             throw APIError.invalidURL
         }
@@ -86,44 +108,41 @@ class APIClient: APIClientProtocol {
         request.httpMethod = method.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        // Add auth token if required
         if requiresAuth, let token = authToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
-        // Encode body if present
-        if let body = body {
+        if let body {
             request.httpBody = try JSONEncoder().encode(body)
         }
 
-        // Perform request
-        let (data, response) = try await session.data(for: request)
+        return request
+    }
 
-        // Check response status
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.invalidResponse
-        }
-
-        switch httpResponse.statusCode {
-        case 200...299:
-            // Success - decode response
-            do {
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                return try decoder.decode(T.self, from: data)
-            } catch {
-                throw APIError.decodingError(error)
-            }
+    private func handleResponse<T: Decodable>(data: Data, statusCode: Int) throws -> T {
+        switch statusCode {
+        case 200 ... 299:
+            return try decodeResponse(data: data)
         case 401:
             throw APIError.unauthorized
         case 403:
             throw APIError.forbidden
         case 404:
             throw APIError.notFound
-        case 500...599:
-            throw APIError.serverError(statusCode: httpResponse.statusCode)
+        case 500 ... 599:
+            throw APIError.serverError(statusCode: statusCode)
         default:
             throw APIError.unknown
+        }
+    }
+
+    private func decodeResponse<T: Decodable>(data: Data) throws -> T {
+        do {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return try decoder.decode(T.self, from: data)
+        } catch {
+            throw APIError.decodingError(error)
         }
     }
 }

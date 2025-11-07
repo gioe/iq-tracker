@@ -5,9 +5,10 @@ enum AppConfig {
     /// API base URL
     static var apiBaseURL: String {
         #if DEBUG
-        return "http://localhost:8000"
+            return "http://localhost:8000"
         #else
-        return "https://api.iqtracker.app" // TODO: Update with production URL
+            // Note: Production URL to be configured during deployment (Phase 9)
+            return "https://api.iqtracker.app"
         #endif
     }
 

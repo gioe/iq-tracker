@@ -25,7 +25,7 @@ struct ErrorView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
 
-            if let retryAction = retryAction {
+            if let retryAction {
                 Button(action: retryAction) {
                     Label("Try Again", systemImage: "arrow.clockwise")
                 }

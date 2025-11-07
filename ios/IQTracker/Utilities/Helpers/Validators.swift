@@ -57,7 +57,7 @@ enum ValidationResult {
     }
 
     var errorMessage: String? {
-        if case .invalid(let message) = self {
+        if case let .invalid(message) = self {
             return message
         }
         return nil

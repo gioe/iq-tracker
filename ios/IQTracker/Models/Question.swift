@@ -1,18 +1,18 @@
 import Foundation
 
 enum QuestionType: String, Codable {
-    case pattern = "pattern"
-    case logic = "logic"
-    case spatial = "spatial"
-    case math = "math"
-    case verbal = "verbal"
-    case memory = "memory"
+    case pattern
+    case logic
+    case spatial
+    case math
+    case verbal
+    case memory
 }
 
 enum DifficultyLevel: String, Codable {
-    case easy = "easy"
-    case medium = "medium"
-    case hard = "hard"
+    case easy
+    case medium
+    case hard
 }
 
 struct Question: Codable, Identifiable {

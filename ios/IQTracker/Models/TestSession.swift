@@ -2,8 +2,8 @@ import Foundation
 
 enum TestStatus: String, Codable {
     case inProgress = "in_progress"
-    case completed = "completed"
-    case abandoned = "abandoned"
+    case completed
+    case abandoned
 }
 
 struct TestSession: Codable, Identifiable {
