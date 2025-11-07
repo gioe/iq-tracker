@@ -590,7 +590,7 @@ arbiters:
 **Goal:** Build iOS app foundation with authentication and navigation
 
 **Tasks:**
-- [ ] **P3-001**: Set up MVVM architecture structure
+- [x] **P3-001**: Set up MVVM architecture structure
 - [ ] **P3-002**: Create networking layer (API client)
 - [ ] **P3-003**: Implement authentication service
 - [ ] **P3-004**: Build Welcome/Login screen
