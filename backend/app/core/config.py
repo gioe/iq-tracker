@@ -35,6 +35,14 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # Rate Limiting
+    RATE_LIMIT_ENABLED: bool = False  # Set to True in production
+    RATE_LIMIT_STRATEGY: str = (
+        "token_bucket"  # token_bucket, sliding_window, fixed_window
+    )
+    RATE_LIMIT_DEFAULT_LIMIT: int = 100  # requests
+    RATE_LIMIT_DEFAULT_WINDOW: int = 60  # seconds
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

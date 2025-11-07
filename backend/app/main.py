@@ -3,8 +3,19 @@ Main FastAPI application.
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Union
 from app.core import settings
 from app.api.v1.api import api_router
+from app.ratelimit import (
+    RateLimiter,
+    RateLimitMiddleware,
+    RateLimitConfig,
+    get_user_identifier,
+    TokenBucketStrategy,
+    SlidingWindowStrategy,
+    FixedWindowStrategy,
+    InMemoryStorage,
+)
 
 # OpenAPI tags metadata
 tags_metadata = [
@@ -72,6 +83,69 @@ def create_application() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Configure Rate Limiting
+    if settings.RATE_LIMIT_ENABLED:
+        # Create storage backend
+        storage = InMemoryStorage()
+
+        # Select strategy based on configuration
+        strategy: Union[TokenBucketStrategy, SlidingWindowStrategy, FixedWindowStrategy]
+        if settings.RATE_LIMIT_STRATEGY == "sliding_window":
+            strategy = SlidingWindowStrategy(storage)
+        elif settings.RATE_LIMIT_STRATEGY == "fixed_window":
+            strategy = FixedWindowStrategy(storage)
+        else:  # Default to token_bucket
+            strategy = TokenBucketStrategy(storage)
+
+        # Create rate limiter
+        limiter = RateLimiter(
+            strategy=strategy,
+            storage=storage,
+            default_limit=settings.RATE_LIMIT_DEFAULT_LIMIT,
+            default_window=settings.RATE_LIMIT_DEFAULT_WINDOW,
+        )
+
+        # Create rate limit configuration with endpoint-specific limits
+        # mypy: ignore - we're using the literal from settings
+        rate_limit_config = RateLimitConfig(
+            strategy=settings.RATE_LIMIT_STRATEGY,  # type: ignore[arg-type]
+            default_limit=settings.RATE_LIMIT_DEFAULT_LIMIT,
+            default_window=settings.RATE_LIMIT_DEFAULT_WINDOW,
+            enabled=True,
+            add_headers=True,
+            skip_paths=[
+                "/",
+                "/health",
+                f"{settings.API_V1_PREFIX}/docs",
+                f"{settings.API_V1_PREFIX}/openapi.json",
+                f"{settings.API_V1_PREFIX}/redoc",
+            ],
+            endpoint_limits={
+                # Strict limits for auth endpoints to prevent abuse
+                f"{settings.API_V1_PREFIX}/auth/login": {
+                    "limit": 5,
+                    "window": 300,
+                },  # 5 per 5 min
+                f"{settings.API_V1_PREFIX}/auth/register": {
+                    "limit": 3,
+                    "window": 3600,
+                },  # 3 per hour
+                f"{settings.API_V1_PREFIX}/auth/refresh": {
+                    "limit": 10,
+                    "window": 60,
+                },  # 10 per min
+            },
+        )
+
+        # Add rate limit middleware
+        app.add_middleware(
+            RateLimitMiddleware,
+            limiter=limiter,
+            identifier_resolver=get_user_identifier,
+            skip_paths=rate_limit_config.skip_paths,
+            add_headers=rate_limit_config.add_headers,
+        )
 
     # Include API router
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
