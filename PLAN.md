@@ -611,8 +611,8 @@ arbiters:
 **Goal:** Build engaging, gamified test-taking interface
 
 **Tasks:**
-- [ ] **P4-001**: Design question display UI/UX
-- [ ] **P4-002**: Implement question fetching from API
+- [x] **P4-001**: Design question display UI/UX
+- [x] **P4-002**: Implement question fetching from API
 - [ ] **P4-003**: Build answer input components (multiple formats)
 - [ ] **P4-004**: Create progress indicators
 - [ ] **P4-005**: Add animations and transitions

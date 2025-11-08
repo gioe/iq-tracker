@@ -13,6 +13,17 @@ class TestTakingViewModel: BaseViewModel {
     @Published var isSubmitting: Bool = false
     @Published var testCompleted: Bool = false
 
+    // MARK: - Private Properties
+
+    private let apiClient: APIClientProtocol
+
+    // MARK: - Initialization
+
+    init(apiClient: APIClientProtocol = APIClient.shared) {
+        self.apiClient = apiClient
+        super.init()
+    }
+
     // MARK: - Computed Properties
 
     var currentQuestion: Question? {
@@ -76,10 +87,35 @@ class TestTakingViewModel: BaseViewModel {
     // MARK: - Test Management
 
     func startTest(questionCount: Int = 20) async {
-        // swiftlint:disable:next todo
-        // TODO: Implement actual API call to start test
-        // For now, load mock questions
-        loadMockQuestions(count: questionCount)
+        setLoading(true)
+        clearError()
+
+        do {
+            // Call the backend API to start a new test
+            let response: StartTestResponse = try await apiClient.request(
+                endpoint: .testStart,
+                method: .get,
+                body: nil as String?,
+                requiresAuth: true
+            )
+
+            // Update state with the response
+            testSession = response.session
+            questions = response.questions
+            currentQuestionIndex = 0
+            userAnswers.removeAll()
+            testCompleted = false
+
+            setLoading(false)
+        } catch {
+            handleError(error)
+            // Fall back to mock questions in development/testing
+            #if DEBUG
+                print("Failed to load questions from API, falling back to mock data: \(error)")
+                loadMockQuestions(count: questionCount)
+                setLoading(false)
+            #endif
+        }
     }
 
     func submitTest() async {
