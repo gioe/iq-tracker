@@ -36,12 +36,27 @@ struct TestTakingView: View {
 
     private var testContentView: some View {
         VStack(spacing: 0) {
-            // Progress at the top
-            TestProgressView(
-                currentQuestion: viewModel.currentQuestionIndex + 1,
-                totalQuestions: viewModel.questions.count,
-                answeredCount: viewModel.answeredCount
-            )
+            // Progress section at the top
+            VStack(spacing: 12) {
+                // Enhanced progress bar with stats
+                TestProgressView(
+                    currentQuestion: viewModel.currentQuestionIndex + 1,
+                    totalQuestions: viewModel.questions.count,
+                    answeredCount: viewModel.answeredCount
+                )
+
+                // Question navigation grid
+                QuestionNavigationGrid(
+                    totalQuestions: viewModel.questions.count,
+                    currentQuestionIndex: viewModel.currentQuestionIndex,
+                    answeredQuestionIndices: answeredQuestionIndices,
+                    onQuestionTap: { index in
+                        withAnimation(.spring(response: 0.3)) {
+                            viewModel.goToQuestion(at: index)
+                        }
+                    }
+                )
+            }
             .padding()
             .background(Color(.systemBackground))
             .shadow(color: Color.black.opacity(0.05), radius: 4, y: 2)
@@ -81,6 +96,18 @@ struct TestTakingView: View {
                 .shadow(color: Color.black.opacity(0.05), radius: 4, y: -2)
         }
         .background(Color(.systemGroupedBackground))
+    }
+
+    // MARK: - Computed Properties
+
+    private var answeredQuestionIndices: Set<Int> {
+        var indices = Set<Int>()
+        for (index, question) in viewModel.questions.enumerated() {
+            if let answer = viewModel.userAnswers[question.id], !answer.isEmpty {
+                indices.insert(index)
+            }
+        }
+        return indices
     }
 
     private var navigationControls: some View {

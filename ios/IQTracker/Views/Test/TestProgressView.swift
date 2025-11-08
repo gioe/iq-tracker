@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Progress indicator showing test completion status
+/// Enhanced progress indicator showing test completion status with detailed stats
 struct TestProgressView: View {
     let currentQuestion: Int
     let totalQuestions: Int
@@ -10,60 +10,133 @@ struct TestProgressView: View {
         Double(currentQuestion) / Double(totalQuestions)
     }
 
+    var completionPercentage: Int {
+        guard totalQuestions > 0 else { return 0 }
+        return Int((Double(answeredCount) / Double(totalQuestions)) * 100)
+    }
+
     var body: some View {
         VStack(spacing: 12) {
-            // Progress bar
-            progressBar
+            // Progress bar with percentage
+            VStack(spacing: 8) {
+                HStack {
+                    Text("Test Progress")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+
+                    Spacer()
+
+                    Text("\(completionPercentage)% Complete")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(completionPercentage == 100 ? .green : .accentColor)
+                }
+
+                progressBar
+            }
 
             // Stats
-            HStack {
-                // Question progress
-                Label {
-                    Text("\(currentQuestion)/\(totalQuestions)")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                } icon: {
-                    Image(systemName: "list.bullet.clipboard")
-                }
+            HStack(spacing: 20) {
+                // Question position
+                statItem(
+                    icon: "doc.text.fill",
+                    value: "\(currentQuestion)/\(totalQuestions)",
+                    label: "Current"
+                )
 
-                Spacer()
+                Divider()
+                    .frame(height: 20)
 
                 // Answered count
-                Label {
-                    Text("\(answeredCount) answered")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                } icon: {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                }
+                statItem(
+                    icon: "checkmark.circle.fill",
+                    value: "\(answeredCount)",
+                    label: "Answered",
+                    iconColor: .green
+                )
+
+                Divider()
+                    .frame(height: 20)
+
+                // Remaining count
+                statItem(
+                    icon: "circle.dotted",
+                    value: "\(totalQuestions - answeredCount)",
+                    label: "Remaining",
+                    iconColor: .orange
+                )
             }
-            .foregroundColor(.secondary)
         }
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
 
     private var progressBar: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
                 // Background
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 6)
                     .fill(Color(.systemGray5))
-                    .frame(height: 8)
+                    .frame(height: 10)
 
-                // Progress
-                RoundedRectangle(cornerRadius: 8)
+                // Progress - segmented by answered questions
+                RoundedRectangle(cornerRadius: 6)
                     .fill(
                         LinearGradient(
-                            colors: [Color.accentColor, Color.accentColor.opacity(0.7)],
+                            colors: [
+                                completionPercentage == 100 ? Color.green : Color.accentColor,
+                                (completionPercentage == 100 ? Color.green : Color.accentColor).opacity(0.7)
+                            ],
                             startPoint: .leading,
                             endPoint: .trailing
                         )
                     )
-                    .frame(width: geometry.size.width * progress, height: 8)
+                    .frame(
+                        width: geometry.size.width * (Double(answeredCount) / Double(totalQuestions)),
+                        height: 10
+                    )
+                    .animation(.spring(response: 0.5, dampingFraction: 0.8), value: answeredCount)
+
+                // Current position indicator
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: 14, height: 14)
+                    .overlay(
+                        Circle()
+                            .strokeBorder(Color.accentColor, lineWidth: 2)
+                    )
+                    .offset(x: (geometry.size.width * progress) - 7)
                     .animation(.spring(response: 0.5, dampingFraction: 0.8), value: progress)
             }
         }
-        .frame(height: 8)
+        .frame(height: 14)
+    }
+
+    private func statItem(
+        icon: String,
+        value: String,
+        label: String,
+        iconColor: Color? = nil
+    ) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .foregroundColor(iconColor ?? .secondary)
+                .font(.caption)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(value)
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+
+                Text(label)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
     }
 }
 
