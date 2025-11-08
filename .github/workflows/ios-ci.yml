@@ -41,13 +41,15 @@ jobs:
           cd ios
           swiftformat --config .swiftformat --lint IQTracker/
 
+      - name: List available simulators
+        run: xcrun simctl list devices available
+
       - name: Build iOS project
         run: |
           cd ios
           xcodebuild -project IQTracker.xcodeproj \
             -scheme IQTracker \
-            -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
             clean build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGN_IDENTITY="" \
