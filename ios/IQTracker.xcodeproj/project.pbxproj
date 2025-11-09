@@ -70,6 +70,7 @@
 		E7F8A9B0C1D2E3F4A5B6C7D8 /* TestHistoryListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8A9B0C1D2E3F4A5B6C7D8E9 /* TestHistoryListItem.swift */; };
 		F5A1B2C3D4E5F6A7B8C9D0E1 /* TestTakingViewModel+MockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F3A4B5C6D7E8F9A0B1C2D3 /* TestTakingViewModel+MockData.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* RegistrationViewModelValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C4D5E6F7A8B9C0D1E2F3A4 /* RegistrationViewModelValidationTests.swift */; };
+		C4D5E6F7A8B9C0D1E2F3A4B5 /* IQTrendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E6F7A8B9C0D1E2F3A4B5C6 /* IQTrendChart.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -149,6 +150,7 @@
 		F8A9B0C1D2E3F4A5B6C7D8E9 /* TestHistoryListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestHistoryListItem.swift; sourceTree = "<group>"; };
 		E2F3A4B5C6D7E8F9A0B1C2D3 /* TestTakingViewModel+MockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TestTakingViewModel+MockData.swift"; sourceTree = "<group>"; };
 		B3C4D5E6F7A8B9C0D1E2F3A4 /* RegistrationViewModelValidationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationViewModelValidationTests.swift; sourceTree = "<group>"; };
+		D5E6F7A8B9C0D1E2F3A4B5C6 /* IQTrendChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IQTrendChart.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -187,6 +189,7 @@
 			children = (
 				48800FF67D75A5E99360F823 /* HistoryView.swift */,
 				F8A9B0C1D2E3F4A5B6C7D8E9 /* TestHistoryListItem.swift */,
+				D5E6F7A8B9C0D1E2F3A4B5C6 /* IQTrendChart.swift */,
 			);
 			path = History;
 			sourceTree = "<group>";
@@ -526,6 +529,7 @@
 				B9ED84EC51137DEBAAED6983 /* ErrorView.swift in Sources */,
 				800D854C2A16D5BCF6A3A0C6 /* HistoryView.swift in Sources */,
 				C5D6E7F8A9B0C1D2E3F4A5B6 /* HistoryViewModel.swift in Sources */,
+			C4D5E6F7A8B9C0D1E2F3A4B5 /* IQTrendChart.swift in Sources */,
 				BB0A35ADCC8900F61FF3AA69 /* IQTrackerApp.swift in Sources */,
 				91429C7C16E238E0C072F0E3 /* KeychainStorage.swift in Sources */,
 				1B7C4B863956DA477A931C3C /* LoadingOverlay.swift in Sources */,
