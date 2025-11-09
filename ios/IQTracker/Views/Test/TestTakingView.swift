@@ -4,6 +4,9 @@ import SwiftUI
 struct TestTakingView: View {
     @StateObject private var viewModel = TestTakingViewModel()
     @Environment(\.dismiss) private var dismiss
+    @State private var showResumeAlert = false
+    @State private var showExitConfirmation = false
+    @State private var savedProgress: SavedTestProgress?
 
     var body: some View {
         ZStack {
@@ -24,12 +27,52 @@ struct TestTakingView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Exit") {
-                    dismiss()
+                    handleExit()
                 }
             }
         }
         .task {
+            await checkForSavedProgress()
+        }
+        .alert("Resume Test?", isPresented: $showResumeAlert) {
+            Button("Resume") {
+                if let progress = savedProgress {
+                    viewModel.restoreProgress(progress)
+                }
+            }
+            Button("Start New") {
+                viewModel.clearSavedProgress()
+                Task {
+                    await viewModel.startTest()
+                }
+            }
+        } message: {
+            Text("You have an incomplete test. Would you like to resume where you left off?")
+        }
+        .alert("Exit Test?", isPresented: $showExitConfirmation) {
+            Button("Exit", role: .destructive) {
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("You have \(viewModel.answeredCount) unsaved answers. Are you sure you want to exit?")
+        }
+    }
+
+    private func checkForSavedProgress() async {
+        if let progress = viewModel.loadSavedProgress() {
+            savedProgress = progress
+            showResumeAlert = true
+        } else {
             await viewModel.startTest()
+        }
+    }
+
+    private func handleExit() {
+        if viewModel.answeredCount > 0 && !viewModel.testCompleted {
+            showExitConfirmation = true
+        } else {
+            dismiss()
         }
     }
 
