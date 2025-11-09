@@ -324,9 +324,7 @@ class TestAbandonTest:
         session_id = start_response.json()["session"]["id"]
 
         # Abandon the test
-        response = client.post(
-            f"/v1/test/{session_id}/abandon", headers=auth_headers
-        )
+        response = client.post(f"/v1/test/{session_id}/abandon", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -392,9 +390,7 @@ class TestAbandonTest:
         db_session.commit()
 
         # Abandon the test
-        response = client.post(
-            f"/v1/test/{session.id}/abandon", headers=auth_headers
-        )
+        response = client.post(f"/v1/test/{session.id}/abandon", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
