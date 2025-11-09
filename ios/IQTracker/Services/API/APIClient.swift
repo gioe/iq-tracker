@@ -49,6 +49,8 @@ enum APIEndpoint {
     case testStart
     /// Submit test answers endpoint
     case testSubmit
+    /// Abandon test session endpoint
+    case testAbandon(Int)
     /// Get test results by ID
     case testResults(String)
     /// Get test history endpoint
@@ -71,6 +73,8 @@ enum APIEndpoint {
             "/v1/test/start"
         case .testSubmit:
             "/v1/test/submit"
+        case let .testAbandon(sessionId):
+            "/v1/test/\(sessionId)/abandon"
         case let .testResults(testId):
             "/v1/test/results/\(testId)"
         case .testHistory:
