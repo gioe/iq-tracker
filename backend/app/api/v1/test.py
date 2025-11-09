@@ -13,6 +13,7 @@ from app.schemas.test_sessions import (
     StartTestResponse,
     TestSessionResponse,
     TestSessionStatusResponse,
+    TestSessionAbandonResponse,
 )
 from app.schemas.questions import QuestionResponse
 from app.schemas.responses import (
@@ -214,6 +215,71 @@ def get_active_test_session(
     return TestSessionStatusResponse(
         session=TestSessionResponse.model_validate(active_session),
         questions_count=questions_count,
+    )
+
+
+@router.post("/{session_id}/abandon", response_model=TestSessionAbandonResponse)
+def abandon_test(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Abandon an in-progress test session.
+
+    Marks the test session as abandoned without calculating results.
+    Any responses saved during the test will be preserved but no
+    test result will be created.
+
+    Args:
+        session_id: Test session ID to abandon
+        current_user: Current authenticated user
+        db: Database session
+
+    Returns:
+        Abandoned session details with response count
+
+    Raises:
+        HTTPException: If session not found, not authorized, or already completed
+    """
+    from app.models.models import Response
+
+    # Fetch the test session
+    test_session = db.query(TestSession).filter(TestSession.id == session_id).first()
+
+    if not test_session:
+        raise HTTPException(status_code=404, detail="Test session not found")
+
+    # Verify session belongs to current user
+    if test_session.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="Not authorized to abandon this test session"
+        )
+
+    # Verify session is in progress
+    if test_session.status != TestStatus.IN_PROGRESS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Test session is already {test_session.status.value}. "  # type: ignore[attr-defined]
+            "Only in-progress sessions can be abandoned.",
+        )
+
+    # Count any responses that were saved during the test
+    responses_saved = (
+        db.query(Response).filter(Response.test_session_id == session_id).count()
+    )
+
+    # Mark session as abandoned
+    test_session.status = TestStatus.ABANDONED  # type: ignore[assignment]
+    test_session.completed_at = datetime.utcnow()  # type: ignore[assignment]
+
+    db.commit()
+    db.refresh(test_session)
+
+    return TestSessionAbandonResponse(
+        session=TestSessionResponse.model_validate(test_session),
+        message="Test session abandoned successfully",
+        responses_saved=responses_saved,
     )
 
 

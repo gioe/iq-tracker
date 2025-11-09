@@ -60,6 +60,18 @@ struct TestSubmitResponse: Codable {
     }
 }
 
+struct TestAbandonResponse: Codable {
+    let session: TestSession
+    let message: String
+    let responsesSaved: Int
+
+    enum CodingKeys: String, CodingKey {
+        case session
+        case message
+        case responsesSaved = "responses_saved"
+    }
+}
+
 struct SubmittedTestResult: Codable {
     let id: Int
     let testSessionId: Int

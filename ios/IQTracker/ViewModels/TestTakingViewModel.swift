@@ -116,7 +116,14 @@ class TestTakingViewModel: BaseViewModel {
 
             setLoading(false)
         } catch {
-            handleError(error)
+            let contextualError = ContextualError(
+                error: error as? APIError ?? .unknown(),
+                operation: .fetchQuestions
+            )
+            handleError(contextualError, retryOperation: { [weak self] in
+                await self?.startTest(questionCount: questionCount)
+            })
+
             // Fall back to mock questions in development/testing
             #if DEBUG
                 print("Failed to load questions from API, falling back to mock data: \(error)")
@@ -128,27 +135,25 @@ class TestTakingViewModel: BaseViewModel {
 
     func submitTest() async {
         guard let session = testSession else {
-            handleError(
-                NSError(
-                    domain: "TestTakingViewModel",
-                    code: -1,
-                    userInfo: [NSLocalizedDescriptionKey: "No active test session"]
-                )
+            let error = NSError(
+                domain: "TestTakingViewModel",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "No active test session. Please start a new test."]
             )
+            handleError(error)
             return
         }
 
         guard allQuestionsAnswered else {
-            handleError(
-                NSError(
-                    domain: "TestTakingViewModel",
-                    code: -1,
-                    userInfo: [
-                        NSLocalizedDescriptionKey:
-                            "Please answer all questions before submitting"
-                    ]
-                )
+            let error = NSError(
+                domain: "TestTakingViewModel",
+                code: -1,
+                userInfo: [
+                    NSLocalizedDescriptionKey:
+                        "Please answer all questions before submitting your test."
+                ]
             )
+            handleError(error)
             return
         }
 
@@ -193,11 +198,67 @@ class TestTakingViewModel: BaseViewModel {
 
     private func handleSubmissionFailure(_ error: Error) {
         isSubmitting = false
-        handleError(error)
+
+        let contextualError = ContextualError(
+            error: error as? APIError ?? .unknown(),
+            operation: .submitTest
+        )
+
+        handleError(contextualError, retryOperation: { [weak self] in
+            await self?.submitTest()
+        })
 
         #if DEBUG
             print("❌ Failed to submit test: \(error)")
         #endif
+    }
+
+    func abandonTest() async {
+        guard let session = testSession else {
+            #if DEBUG
+                print("⚠️ No active session to abandon")
+            #endif
+            return
+        }
+
+        setLoading(true)
+        clearError()
+
+        do {
+            let response: TestAbandonResponse = try await apiClient.request(
+                endpoint: .testAbandon(session.id),
+                method: .post,
+                body: nil as String?,
+                requiresAuth: true
+            )
+
+            // Update session with abandoned status
+            testSession = response.session
+
+            // Clear locally saved progress
+            clearSavedProgress()
+
+            setLoading(false)
+
+            #if DEBUG
+                print("✅ Test abandoned successfully. Responses saved: \(response.responsesSaved)")
+            #endif
+        } catch {
+            setLoading(false)
+
+            let contextualError = ContextualError(
+                error: error as? APIError ?? .unknown(),
+                operation: .submitTest // Reusing submitTest operation for consistency
+            )
+
+            handleError(contextualError, retryOperation: { [weak self] in
+                await self?.abandonTest()
+            })
+
+            #if DEBUG
+                print("❌ Failed to abandon test: \(error)")
+            #endif
+        }
     }
 
     func resetTest() {
@@ -273,89 +334,5 @@ class TestTakingViewModel: BaseViewModel {
 
     var hasSavedProgress: Bool {
         answerStorage.hasProgress()
-    }
-
-    // MARK: - Mock Data
-
-    private var sampleQuestions: [Question] {
-        [
-            Question(
-                id: 1,
-                questionText: "What number comes next in this sequence: 2, 4, 8, 16, ?",
-                questionType: .pattern,
-                difficultyLevel: .easy,
-                answerOptions: nil,
-                explanation: "The pattern is doubling: 2×2=4, 4×2=8, 8×2=16, 16×2=32"
-            ),
-            Question(
-                id: 2,
-                questionText: "Which word doesn't belong: Apple, Banana, Carrot, Orange",
-                questionType: .logic,
-                difficultyLevel: .easy,
-                answerOptions: ["Apple", "Banana", "Carrot", "Orange"],
-                explanation: "Carrot is a vegetable, while the others are fruits"
-            ),
-            Question(
-                id: 3,
-                questionText: "If all roses are flowers and some flowers fade quickly, then:",
-                questionType: .logic,
-                difficultyLevel: .medium,
-                answerOptions: [
-                    "All roses fade quickly",
-                    "Some roses might fade quickly",
-                    "No roses fade quickly",
-                    "Cannot be determined"
-                ],
-                explanation: "We can only conclude that some roses might fade quickly"
-            ),
-            Question(
-                id: 4,
-                questionText: "What is 15% of 200?",
-                questionType: .math,
-                difficultyLevel: .easy,
-                answerOptions: nil,
-                explanation: "15% of 200 = 0.15 × 200 = 30"
-            ),
-            Question(
-                id: 5,
-                questionText: "Find the missing letter in the sequence: A, C, F, J, O, ?",
-                questionType: .pattern,
-                difficultyLevel: .medium,
-                answerOptions: nil,
-                explanation: "The gaps increase by 1 each time: +1, +2, +3, +4, +5 → U"
-            )
-        ]
-    }
-
-    private func loadMockQuestions(count: Int) {
-        let mockQuestions = sampleQuestions
-
-        // Repeat questions to reach desired count
-        var allQuestions: [Question] = []
-        while allQuestions.count < count {
-            for question in mockQuestions {
-                if allQuestions.count >= count { break }
-                // Create a copy with a new ID
-                let newQuestion = Question(
-                    id: allQuestions.count + 1,
-                    questionText: question.questionText,
-                    questionType: question.questionType,
-                    difficultyLevel: question.difficultyLevel,
-                    answerOptions: question.answerOptions,
-                    explanation: question.explanation
-                )
-                allQuestions.append(newQuestion)
-            }
-        }
-
-        questions = allQuestions
-        testSession = TestSession(
-            id: 1,
-            userId: 1,
-            startedAt: Date(),
-            completedAt: nil,
-            status: .inProgress,
-            questions: allQuestions
-        )
     }
 }

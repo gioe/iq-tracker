@@ -309,3 +309,225 @@ class TestGetActiveTestSession:
 
         assert response.status_code == 200
         assert response.json() is None
+
+
+class TestAbandonTest:
+    """Tests for POST /v1/test/{session_id}/abandon endpoint."""
+
+    def test_abandon_test_success(self, client, auth_headers, test_questions):
+        """Test successfully abandoning an in-progress test session."""
+        # Start a test first
+        start_response = client.post(
+            "/v1/test/start?question_count=2", headers=auth_headers
+        )
+        assert start_response.status_code == 200
+        session_id = start_response.json()["session"]["id"]
+
+        # Abandon the test
+        response = client.post(f"/v1/test/{session_id}/abandon", headers=auth_headers)
+
+        assert response.status_code == 200
+        data = response.json()
+
+        # Verify response structure
+        assert "session" in data
+        assert "message" in data
+        assert "responses_saved" in data
+
+        # Verify session is marked as abandoned
+        session = data["session"]
+        assert session["id"] == session_id
+        assert session["status"] == "abandoned"
+        assert session["completed_at"] is not None
+
+        # Verify message
+        assert "abandoned successfully" in data["message"]
+
+        # No responses saved yet
+        assert data["responses_saved"] == 0
+
+    def test_abandon_test_with_responses_saved(
+        self, client, auth_headers, test_questions, db_session
+    ):
+        """Test abandoning test with some responses already saved."""
+        from app.models import User, TestSession
+        from app.models.models import Response, TestStatus
+        from datetime import datetime
+
+        # Get test user
+        test_user = (
+            db_session.query(User).filter(User.email == "test@example.com").first()
+        )
+
+        # Create a test session
+        session = TestSession(
+            user_id=test_user.id,
+            status=TestStatus.IN_PROGRESS,
+        )
+        db_session.add(session)
+        db_session.commit()
+        db_session.refresh(session)
+
+        # Add some responses (simulating partial test completion)
+        response1 = Response(
+            test_session_id=session.id,
+            user_id=test_user.id,
+            question_id=test_questions[0].id,
+            user_answer="A",
+            is_correct=True,
+            answered_at=datetime.utcnow(),
+        )
+        response2 = Response(
+            test_session_id=session.id,
+            user_id=test_user.id,
+            question_id=test_questions[1].id,
+            user_answer="B",
+            is_correct=False,
+            answered_at=datetime.utcnow(),
+        )
+        db_session.add(response1)
+        db_session.add(response2)
+        db_session.commit()
+
+        # Abandon the test
+        response = client.post(f"/v1/test/{session.id}/abandon", headers=auth_headers)
+
+        assert response.status_code == 200
+        data = response.json()
+
+        # Should report 2 responses saved
+        assert data["responses_saved"] == 2
+        assert data["session"]["status"] == "abandoned"
+
+    def test_abandon_test_not_found(self, client, auth_headers):
+        """Test abandoning non-existent session."""
+        response = client.post("/v1/test/99999/abandon", headers=auth_headers)
+
+        assert response.status_code == 404
+        assert "not found" in response.json()["detail"]
+
+    def test_abandon_test_unauthorized_access(
+        self, client, auth_headers, test_questions, db_session
+    ):
+        """Test that users cannot abandon other users' sessions."""
+        from app.models import User, TestSession
+        from app.models.models import TestStatus
+        from app.core.security import hash_password
+
+        # Create second user
+        user2 = User(
+            email="user2@example.com",
+            password_hash=hash_password("password123"),
+            first_name="User",
+            last_name="Two",
+        )
+        db_session.add(user2)
+        db_session.commit()
+        db_session.refresh(user2)
+
+        # Create session for user2
+        session = TestSession(
+            user_id=user2.id,
+            status=TestStatus.IN_PROGRESS,
+        )
+        db_session.add(session)
+        db_session.commit()
+        db_session.refresh(session)
+
+        # Try to abandon user2's session with user1's credentials
+        response = client.post(f"/v1/test/{session.id}/abandon", headers=auth_headers)
+
+        assert response.status_code == 403
+        assert "Not authorized" in response.json()["detail"]
+
+    def test_abandon_test_already_completed(
+        self, client, auth_headers, test_questions, db_session
+    ):
+        """Test that completed sessions cannot be abandoned."""
+        from app.models import User, TestSession
+        from app.models.models import TestStatus
+        from datetime import datetime
+
+        # Get test user
+        test_user = (
+            db_session.query(User).filter(User.email == "test@example.com").first()
+        )
+
+        # Create a completed session
+        session = TestSession(
+            user_id=test_user.id,
+            status=TestStatus.COMPLETED,
+            started_at=datetime.utcnow(),
+            completed_at=datetime.utcnow(),
+        )
+        db_session.add(session)
+        db_session.commit()
+        db_session.refresh(session)
+
+        # Try to abandon completed session
+        response = client.post(f"/v1/test/{session.id}/abandon", headers=auth_headers)
+
+        assert response.status_code == 400
+        assert "already completed" in response.json()["detail"]
+
+    def test_abandon_test_already_abandoned(
+        self, client, auth_headers, test_questions, db_session
+    ):
+        """Test that abandoned sessions cannot be abandoned again."""
+        from app.models import User, TestSession
+        from app.models.models import TestStatus
+        from datetime import datetime
+
+        # Get test user
+        test_user = (
+            db_session.query(User).filter(User.email == "test@example.com").first()
+        )
+
+        # Create an abandoned session
+        session = TestSession(
+            user_id=test_user.id,
+            status=TestStatus.ABANDONED,
+            started_at=datetime.utcnow(),
+            completed_at=datetime.utcnow(),
+        )
+        db_session.add(session)
+        db_session.commit()
+        db_session.refresh(session)
+
+        # Try to abandon already abandoned session
+        response = client.post(f"/v1/test/{session.id}/abandon", headers=auth_headers)
+
+        assert response.status_code == 400
+        assert "already abandoned" in response.json()["detail"]
+
+    def test_abandon_test_requires_authentication(self, client, test_questions):
+        """Test that endpoint requires authentication."""
+        response = client.post("/v1/test/1/abandon")
+        assert response.status_code in [401, 403]
+
+    def test_abandon_test_allows_new_session(
+        self, client, auth_headers, test_questions
+    ):
+        """Test that user can start new test after abandoning."""
+        # Start first test
+        start_response1 = client.post(
+            "/v1/test/start?question_count=2", headers=auth_headers
+        )
+        assert start_response1.status_code == 200
+        session_id1 = start_response1.json()["session"]["id"]
+
+        # Abandon the test
+        abandon_response = client.post(
+            f"/v1/test/{session_id1}/abandon", headers=auth_headers
+        )
+        assert abandon_response.status_code == 200
+
+        # Should be able to start a new test now
+        start_response2 = client.post(
+            "/v1/test/start?question_count=2", headers=auth_headers
+        )
+        assert start_response2.status_code == 200
+        session_id2 = start_response2.json()["session"]["id"]
+
+        # Should be a different session
+        assert session_id2 != session_id1

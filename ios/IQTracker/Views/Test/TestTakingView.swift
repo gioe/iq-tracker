@@ -7,6 +7,7 @@ struct TestTakingView: View {
     @State private var showResumeAlert = false
     @State private var showExitConfirmation = false
     @State private var savedProgress: SavedTestProgress?
+    @State private var showResultsView = false
 
     var body: some View {
         ZStack {
@@ -51,11 +52,22 @@ struct TestTakingView: View {
         }
         .alert("Exit Test?", isPresented: $showExitConfirmation) {
             Button("Exit", role: .destructive) {
-                dismiss()
+                Task {
+                    await viewModel.abandonTest()
+                    dismiss()
+                }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("You have \(viewModel.answeredCount) unsaved answers. Are you sure you want to exit?")
+        }
+        .sheet(isPresented: $showResultsView) {
+            if let result = viewModel.testResult {
+                TestResultsView(result: result) {
+                    showResultsView = false
+                    dismiss()
+                }
+            }
         }
     }
 
@@ -258,9 +270,7 @@ struct TestTakingView: View {
                 PrimaryButton(
                     title: "View Results",
                     action: {
-                        // swiftlint:disable:next todo
-                        // TODO: Navigate to results
-                        dismiss()
+                        showResultsView = true
                     },
                     isLoading: false
                 )
