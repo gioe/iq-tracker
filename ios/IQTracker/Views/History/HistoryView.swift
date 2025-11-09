@@ -60,6 +60,10 @@ struct HistoryView: View {
                     .padding(.vertical)
                 }
 
+                // Trend Chart
+                IQTrendChart(testHistory: viewModel.testHistory)
+                    .padding(.horizontal)
+
                 Divider()
                     .padding(.horizontal)
 
