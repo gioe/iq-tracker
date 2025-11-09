@@ -2,16 +2,26 @@ import Foundation
 
 /// Operation context for better error messages
 enum NetworkOperation {
+    /// User login operation
     case login
+    /// User registration operation
     case register
+    /// Fetching test questions
     case fetchQuestions
+    /// Submitting test answers
     case submitTest
+    /// Refreshing authentication token
     case refreshToken
+    /// Fetching user profile
     case fetchProfile
+    /// Updating user profile
     case updateProfile
+    /// User logout operation
     case logout
+    /// Generic network operation
     case generic
 
+    /// User-friendly name for the operation
     var userFacingName: String {
         switch self {
         case .login:
@@ -37,18 +47,30 @@ enum NetworkOperation {
 }
 
 enum APIError: Error, LocalizedError {
+    /// The URL is invalid or malformed
     case invalidURL
+    /// The server response is invalid or unexpected
     case invalidResponse
+    /// Authentication failed or token expired
     case unauthorized(message: String? = nil)
+    /// Access to the resource is forbidden
     case forbidden(message: String? = nil)
+    /// The requested resource was not found
     case notFound(message: String? = nil)
+    /// Server error occurred
     case serverError(statusCode: Int, message: String? = nil)
+    /// Failed to decode the server response
     case decodingError(Error)
+    /// Network connectivity error
     case networkError(Error)
+    /// Request timed out
     case timeout
+    /// No internet connection available
     case noInternetConnection
+    /// Unknown error occurred
     case unknown(message: String? = nil)
 
+    /// User-friendly error description
     var errorDescription: String? {
         switch self {
         case .invalidURL:
@@ -93,6 +115,7 @@ enum APIError: Error, LocalizedError {
         }
     }
 
+    /// Whether this error is retryable (e.g., network errors, timeouts, server errors)
     var isRetryable: Bool {
         switch self {
         case .networkError, .timeout, .noInternetConnection, .serverError:
@@ -128,6 +151,8 @@ struct ContextualError: Error, LocalizedError {
     }
 }
 
+/// Server error response structure
 struct ErrorResponse: Codable {
+    /// Detailed error message from the server
     let detail: String
 }

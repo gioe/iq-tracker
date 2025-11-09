@@ -8,6 +8,7 @@ class BaseViewModel: ObservableObject {
     /// Indicates whether the last failed operation can be retried
     @Published var canRetry: Bool = false
 
+    /// Storage for Combine subscriptions
     var cancellables = Set<AnyCancellable>()
     private var lastFailedOperation: (() async -> Void)?
 

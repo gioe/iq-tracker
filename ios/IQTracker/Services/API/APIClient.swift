@@ -2,6 +2,13 @@ import Foundation
 
 /// Protocol defining the API client interface
 protocol APIClientProtocol {
+    /// Perform an API request
+    /// - Parameters:
+    ///   - endpoint: The API endpoint to call
+    ///   - method: HTTP method to use
+    ///   - body: Optional request body
+    ///   - requiresAuth: Whether authentication is required
+    /// - Returns: Decoded response of type T
     func request<T: Decodable>(
         endpoint: APIEndpoint,
         method: HTTPMethod,
@@ -9,29 +16,45 @@ protocol APIClientProtocol {
         requiresAuth: Bool
     ) async throws -> T
 
+    /// Set the authentication token for API requests
+    /// - Parameter token: The bearer token to use, or nil to clear
     func setAuthToken(_ token: String?)
 }
 
 /// HTTP methods supported by the API
 enum HTTPMethod: String {
+    /// HTTP GET method
     case get = "GET"
+    /// HTTP POST method
     case post = "POST"
+    /// HTTP PUT method
     case put = "PUT"
+    /// HTTP DELETE method
     case delete = "DELETE"
 }
 
 /// API endpoint definitions
 enum APIEndpoint {
+    /// User registration endpoint
     case register
+    /// User login endpoint
     case login
+    /// Token refresh endpoint
     case refreshToken
+    /// User logout endpoint
     case logout
+    /// User profile endpoint
     case userProfile
+    /// Start test session endpoint
     case testStart
+    /// Submit test answers endpoint
     case testSubmit
+    /// Get test results by ID
     case testResults(String)
+    /// Get test history endpoint
     case testHistory
 
+    /// The URL path for this endpoint
     var path: String {
         switch self {
         case .register:
