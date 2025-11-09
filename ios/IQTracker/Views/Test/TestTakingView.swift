@@ -52,7 +52,10 @@ struct TestTakingView: View {
         }
         .alert("Exit Test?", isPresented: $showExitConfirmation) {
             Button("Exit", role: .destructive) {
-                dismiss()
+                Task {
+                    await viewModel.abandonTest()
+                    dismiss()
+                }
             }
             Button("Cancel", role: .cancel) {}
         } message: {

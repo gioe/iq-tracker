@@ -40,3 +40,13 @@ class TestSessionStatusResponse(BaseModel):
 
     session: TestSessionResponse = Field(..., description="Test session details")
     questions_count: int = Field(..., description="Number of questions in this session")
+
+
+class TestSessionAbandonResponse(BaseModel):
+    """Schema for abandoning a test session."""
+
+    session: TestSessionResponse = Field(..., description="Abandoned test session")
+    message: str = Field(..., description="Success message")
+    responses_saved: int = Field(
+        ..., description="Number of responses saved before abandonment"
+    )

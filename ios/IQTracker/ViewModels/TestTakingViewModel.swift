@@ -213,6 +213,54 @@ class TestTakingViewModel: BaseViewModel {
         #endif
     }
 
+    func abandonTest() async {
+        guard let session = testSession else {
+            #if DEBUG
+                print("⚠️ No active session to abandon")
+            #endif
+            return
+        }
+
+        setLoading(true)
+        clearError()
+
+        do {
+            let response: TestAbandonResponse = try await apiClient.request(
+                endpoint: .testAbandon(session.id),
+                method: .post,
+                body: nil as String?,
+                requiresAuth: true
+            )
+
+            // Update session with abandoned status
+            testSession = response.session
+
+            // Clear locally saved progress
+            clearSavedProgress()
+
+            setLoading(false)
+
+            #if DEBUG
+                print("✅ Test abandoned successfully. Responses saved: \(response.responsesSaved)")
+            #endif
+        } catch {
+            setLoading(false)
+
+            let contextualError = ContextualError(
+                error: error as? APIError ?? .unknown(),
+                operation: .submitTest // Reusing submitTest operation for consistency
+            )
+
+            handleError(contextualError, retryOperation: { [weak self] in
+                await self?.abandonTest()
+            })
+
+            #if DEBUG
+                print("❌ Failed to abandon test: \(error)")
+            #endif
+        }
+    }
+
     func resetTest() {
         currentQuestionIndex = 0
         userAnswers.removeAll()
