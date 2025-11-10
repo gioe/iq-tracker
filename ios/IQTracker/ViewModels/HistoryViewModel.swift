@@ -50,6 +50,7 @@ class HistoryViewModel: BaseViewModel {
 
     private let apiClient: APIClientProtocol
     private var allTestHistory: [TestResult] = []
+    private var cachedInsights: PerformanceInsights?
 
     // MARK: - Initialization
 
@@ -72,6 +73,7 @@ class HistoryViewModel: BaseViewModel {
                    forKey: DataCache.Key.testHistory
                ) {
                 allTestHistory = cachedHistory
+                cachedInsights = nil // Invalidate insights cache
                 applyFiltersAndSort()
                 setLoading(false)
 
@@ -93,6 +95,7 @@ class HistoryViewModel: BaseViewModel {
             await DataCache.shared.set(history, forKey: DataCache.Key.testHistory)
 
             allTestHistory = history
+            cachedInsights = nil // Invalidate insights cache
             applyFiltersAndSort()
             setLoading(false)
 
@@ -179,9 +182,21 @@ class HistoryViewModel: BaseViewModel {
         testHistory.count
     }
 
-    /// Performance insights calculated from all test history
+    /// Performance insights calculated from all test history (cached for performance)
     var performanceInsights: PerformanceInsights? {
-        guard !allTestHistory.isEmpty else { return nil }
-        return PerformanceInsights(from: allTestHistory)
+        guard !allTestHistory.isEmpty else {
+            cachedInsights = nil
+            return nil
+        }
+
+        // Return cached insights if available and data hasn't changed
+        if let cached = cachedInsights {
+            return cached
+        }
+
+        // Calculate new insights and cache
+        let insights = PerformanceInsights(from: allTestHistory)
+        cachedInsights = insights
+        return insights
     }
 }
