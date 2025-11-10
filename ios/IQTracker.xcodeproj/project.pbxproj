@@ -73,6 +73,8 @@
 		C4D5E6F7A8B9C0D1E2F3A4B5 /* IQTrendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E6F7A8B9C0D1E2F3A4B5C6 /* IQTrendChart.swift */; };
 		E8F9G0H1I2J3K4L5M6N7O8P9 /* TestDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E8D9C0B1A2938475D6E5F4 /* TestDetailView.swift */; };
 		H9I0J1K2L3M4N5O6P7Q8R9S0 /* TestDetailView+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = G8F9H0I1J2K3L4M5N6O7P8Q9 /* TestDetailView+Helpers.swift */; };
+		63653832353434352D343461 /* PerformanceInsights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30373531626662632D633338 /* PerformanceInsights.swift */; };
+		64343265653530362D333531 /* InsightsCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38323863383430662D346137 /* InsightsCardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -155,6 +157,8 @@
 		D5E6F7A8B9C0D1E2F3A4B5C6 /* IQTrendChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IQTrendChart.swift; sourceTree = "<group>"; };
 		F7E8D9C0B1A2938475D6E5F4 /* TestDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestDetailView.swift; sourceTree = "<group>"; };
 		G8F9H0I1J2K3L4M5N6O7P8Q9 /* TestDetailView+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TestDetailView+Helpers.swift"; sourceTree = "<group>"; };
+		30373531626662632D633338 /* PerformanceInsights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceInsights.swift; sourceTree = "<group>"; };
+		38323863383430662D346137 /* InsightsCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsCardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -192,6 +196,7 @@
 			isa = PBXGroup;
 			children = (
 				48800FF67D75A5E99360F823 /* HistoryView.swift */,
+				38323863383430662D346137 /* InsightsCardView.swift */,
 				F8A9B0C1D2E3F4A5B6C7D8E9 /* TestHistoryListItem.swift */,
 				F7E8D9C0B1A2938475D6E5F4 /* TestDetailView.swift */,
 				G8F9H0I1J2K3L4M5N6O7P8Q9 /* TestDetailView+Helpers.swift */,
@@ -217,6 +222,7 @@
 				6EFDBB8E31CBDCB816DDF108 /* Question.swift */,
 				EAD450FEDB645BEA1DF45183 /* SavedTestProgress.swift */,
 				0056CC6BC1A9215EF25A11B0 /* TestResult.swift */,
+				30373531626662632D633338 /* PerformanceInsights.swift */,
 				86E43C061ABEE2ECA98EAFF1 /* TestSession.swift */,
 				6521BFC6112CCF91F2B0CB52 /* User.swift */,
 			);
@@ -534,6 +540,7 @@
 				6E1EB0DAAF8F6606D18C1BCE /* ErrorBanner.swift in Sources */,
 				B9ED84EC51137DEBAAED6983 /* ErrorView.swift in Sources */,
 				800D854C2A16D5BCF6A3A0C6 /* HistoryView.swift in Sources */,
+				64343265653530362D333531 /* InsightsCardView.swift in Sources */,
 				C5D6E7F8A9B0C1D2E3F4A5B6 /* HistoryViewModel.swift in Sources */,
 			C4D5E6F7A8B9C0D1E2F3A4B5 /* IQTrendChart.swift in Sources */,
 				BB0A35ADCC8900F61FF3AA69 /* IQTrackerApp.swift in Sources */,
@@ -562,6 +569,7 @@
 				839DA70AA82533D50930E73F /* String+Extensions.swift in Sources */,
 				B23A55ED0D362D1647AFD2AA /* TestProgressView.swift in Sources */,
 				D88029805B3118E461FA3658 /* TestResult.swift in Sources */,
+				63653832353434352D343461 /* PerformanceInsights.swift in Sources */,
 				3E4B1A2F8D9C7E5A6B3F0428 /* TestResultsView.swift in Sources */,
 				CB53CBAECADC29C37C7D6EB9 /* TestSession.swift in Sources */,
 				3D3F26FF367BD9BC77353227 /* TestTakingView.swift in Sources */,

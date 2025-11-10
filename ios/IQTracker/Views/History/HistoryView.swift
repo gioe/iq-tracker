@@ -93,6 +93,12 @@ struct HistoryView: View {
                     .padding(.vertical)
                 }
 
+                // Performance Insights
+                if let insights = viewModel.performanceInsights {
+                    InsightsCardView(insights: insights)
+                        .padding(.horizontal)
+                }
+
                 // Trend Chart
                 IQTrendChart(testHistory: viewModel.testHistory)
                     .padding(.horizontal)

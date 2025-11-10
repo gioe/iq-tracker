@@ -157,4 +157,10 @@ class HistoryViewModel: BaseViewModel {
     var filteredResultsCount: Int {
         testHistory.count
     }
+
+    /// Performance insights calculated from all test history
+    var performanceInsights: PerformanceInsights? {
+        guard !allTestHistory.isEmpty else { return nil }
+        return PerformanceInsights(from: allTestHistory)
+    }
 }
