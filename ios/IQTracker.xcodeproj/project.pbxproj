@@ -40,6 +40,7 @@
 		6E1EB0DAAF8F6606D18C1BCE /* ErrorBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67CEB2DCF7782567F9CBF677 /* ErrorBanner.swift */; };
 		717530B196F1E5ACA7BCFA6F /* TestTakingViewModel+MockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1EB27503C7AD5786387369 /* TestTakingViewModel+MockData.swift */; };
 		7460650B71B8E7FD1FD123EE /* NetworkStatusBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46174E2D8FEE08DEBCAAE9C /* NetworkStatusBanner.swift */; };
+		78F1F140FFAB9F0F2E04EF4E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220AB5C8EBF32FEBE3533030 /* AppDelegate.swift */; };
 		800D854C2A16D5BCF6A3A0C6 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48800FF67D75A5E99360F823 /* HistoryView.swift */; };
 		8157ADA4E6ECBAC294EF3847 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7439E4A25DFCFDBAEDED570C /* DashboardViewModel.swift */; };
 		839DA70AA82533D50930E73F /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5417B4CD26041562A41E46B /* String+Extensions.swift */; };
@@ -99,6 +100,7 @@
 		0F1EB27503C7AD5786387369 /* TestTakingViewModel+MockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TestTakingViewModel+MockData.swift"; sourceTree = "<group>"; };
 		11E187E84003BCA98C5744EB /* TestResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestResultsView.swift; sourceTree = "<group>"; };
 		1CED6BD6ED806B6CE39A12D8 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		220AB5C8EBF32FEBE3533030 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2A1A0D7C2A77C6D1B6AFAC46 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		2A92FBC0678B2E896CA141C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		2C29486AFD5130B405113D8A /* DataCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCache.swift; sourceTree = "<group>"; };
@@ -371,6 +373,7 @@
 		970DDFA52A2533A088D083E6 /* IQTracker */ = {
 			isa = PBXGroup;
 			children = (
+				220AB5C8EBF32FEBE3533030 /* AppDelegate.swift */,
 				7A0B3336ACC1395A6017781A /* Assets.xcassets */,
 				2A92FBC0678B2E896CA141C9 /* Info.plist */,
 				54A82E41DC9C54475BC41B81 /* IQTracker.entitlements */,
@@ -538,6 +541,7 @@
 				899C55ED04C9CB82D0982A14 /* APIError.swift in Sources */,
 				BDD8082177D8D3108C6F2543 /* AnswerInputView.swift in Sources */,
 				B21BA9DD4167BDF1852D1EC8 /* AppConfig.swift in Sources */,
+				78F1F140FFAB9F0F2E04EF4E /* AppDelegate.swift in Sources */,
 				C724BDDCDE04C6024C537E6A /* Auth.swift in Sources */,
 				CF07968ED73AAC85C285FBDD /* AuthManager.swift in Sources */,
 				E1461CEF734E470485969D85 /* AuthManagerProtocol.swift in Sources */,
