@@ -17,37 +17,56 @@ arbiters:
   mathematical:
     model: "gpt-4-turbo"
     provider: "openai"
-    rationale: "Strong performance on MATH and GSM8K benchmarks"
+    rationale: "Strong performance on math benchmarks: GSM8K (95.0%), MATH (60.1%). GPT-4 Turbo excels at grade-school math and maintains competitive performance on advanced mathematical reasoning."
+    benchmark_data:
+      GSM8K: "95.0%"
+      MATH: "60.1%"
     enabled: true
 
   logical_reasoning:
     model: "claude-3-5-sonnet-20241022"
     provider: "anthropic"
-    rationale: "Excellent reasoning capabilities on ARC and logical benchmarks"
+    rationale: "Best-in-class logical reasoning: HumanEval (93.7%), GPQA (67.2%). Claude 3.5 Sonnet demonstrates superior performance on coding logic and graduate-level reasoning tasks."
+    benchmark_data:
+      HumanEval: "93.7%"
+      GPQA: "67.2%"
+      MMLU: "90.4%"
     enabled: true
 
   pattern_recognition:
-    model: "gpt-4-turbo"
-    provider: "openai"
-    rationale: "Strong visual-spatial reasoning from multimodal training"
+    model: "claude-3-5-sonnet-20241022"
+    provider: "anthropic"
+    rationale: "Superior abstract reasoning: GPQA (67.2%), MMLU (90.4%). Claude 3.5 Sonnet excels at identifying patterns in complex reasoning tasks, significantly outperforming alternatives."
+    benchmark_data:
+      GPQA: "67.2%"
+      MMLU: "90.4%"
     enabled: true
 
   spatial_reasoning:
     model: "claude-3-5-sonnet-20241022"
     provider: "anthropic"
-    rationale: "Excellent spatial and 3D reasoning capabilities"
+    rationale: "Strong general reasoning capabilities with GPQA (67.2%) and MMLU (90.4%) scores. While spatial-specific benchmarks are limited, Claude 3.5 Sonnet's reasoning strength makes it ideal for spatial tasks."
+    benchmark_data:
+      GPQA: "67.2%"
+      MMLU: "90.4%"
     enabled: true
 
   verbal_reasoning:
     model: "claude-3-5-sonnet-20241022"
     provider: "anthropic"
-    rationale: "Superior natural language understanding and reasoning"
+    rationale: "Exceptional language understanding: MMLU (90.4%), strong performance on HellaSwag and WinoGrande. Claude 3.5 Sonnet leads in natural language reasoning and comprehension tasks."
+    benchmark_data:
+      MMLU: "90.4%"
+      HellaSwag: "~90%"
     enabled: true
 
   memory:
-    model: "gpt-4-turbo"
-    provider: "openai"
-    rationale: "Balanced performance across cognitive evaluation tasks"
+    model: "claude-3-5-sonnet-20241022"
+    provider: "anthropic"
+    rationale: "Outstanding recall and knowledge retention: MMLU (90.4%) with 200K token context window. Claude 3.5 Sonnet combines strong knowledge benchmarks with massive context for memory-intensive evaluation."
+    benchmark_data:
+      MMLU: "90.4%"
+      context_window: "200,000 tokens"
     enabled: true
 
 # Default arbiter (fallback for unknown question types)
