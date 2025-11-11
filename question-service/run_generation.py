@@ -142,11 +142,16 @@ def main() -> int:
     log_level = "DEBUG" if args.verbose else settings.log_level
     log_file = args.log_file or settings.log_file
 
-    logger = setup_logging(
+    setup_logging(
         log_level=log_level,
         log_file=log_file,
-        enable_console=not args.no_console,
+        enable_file_logging=not args.no_console,
     )
+
+    # Get logger after setup
+    import logging
+
+    logger = logging.getLogger(__name__)
 
     logger.info("=" * 80)
     logger.info("Question Generation Script Starting")
@@ -303,6 +308,8 @@ def main() -> int:
 
             for question in approved_questions:
                 try:
+                    # Type assertion: deduplicator is guaranteed to be initialized here
+                    assert deduplicator is not None
                     is_duplicate = deduplicator.is_duplicate(question)
 
                     if not is_duplicate:
@@ -336,6 +343,8 @@ def main() -> int:
 
             for i, question in enumerate(unique_questions, 1):
                 try:
+                    # Type assertion: db is guaranteed to be initialized here
+                    assert db is not None
                     question_id = db.insert_question(question)
                     inserted_count += 1
                     logger.debug(
