@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     env: str = "development"
     debug: bool = True
     log_level: str = "INFO"
+    log_file: str = "./logs/question_service.log"
 
     # LLM API Keys
     openai_api_key: Optional[str] = None
