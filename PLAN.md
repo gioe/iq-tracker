@@ -676,7 +676,7 @@ arbiters:
 **Tasks:**
 - [x] **P7-001**: Set up APNs configuration and certificates
 - [x] **P7-002**: Implement device token registration endpoint in backend
-- [ ] **P7-003**: Build notification scheduling logic (6-month cadence)
+- [x] **P7-003**: Build notification scheduling logic (6-month cadence)
 - [ ] **P7-004**: Implement APNs integration in backend
 - [ ] **P7-005**: Add notification handling in iOS app
 - [ ] **P7-006**: Build notification preferences UI

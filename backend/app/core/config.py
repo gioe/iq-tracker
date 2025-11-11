@@ -43,6 +43,11 @@ class Settings(BaseSettings):
     RATE_LIMIT_DEFAULT_LIMIT: int = 100  # requests
     RATE_LIMIT_DEFAULT_WINDOW: int = 60  # seconds
 
+    # Notification Scheduling
+    TEST_CADENCE_DAYS: int = 180  # 6 months = 180 days
+    NOTIFICATION_ADVANCE_DAYS: int = 0  # Days before test is due to send notification
+    NOTIFICATION_REMINDER_DAYS: int = 7  # Days after due date to send reminder
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
