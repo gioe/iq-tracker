@@ -7,7 +7,7 @@
 # Configuration Structure:
 #   question_type:
 #     model: Model identifier (e.g., "gpt-4", "claude-sonnet-4-5")
-#     provider: Provider name ("openai", "anthropic", "google")
+#     provider: Provider name ("openai", "anthropic", "google", "xai")
 #     rationale: Explanation of why this model was chosen
 #     enabled: Whether this arbiter is active (default: true)
 
@@ -15,12 +15,14 @@ version: "1.0"
 
 arbiters:
   mathematical:
-    model: "gpt-4-turbo"
-    provider: "openai"
-    rationale: "Strong performance on math benchmarks: GSM8K (95.0%), MATH (60.1%). GPT-4 Turbo excels at grade-school math and maintains competitive performance on advanced mathematical reasoning."
+    model: "grok-4"
+    provider: "xai"
+    rationale: "Exceptional math performance: GSM8K (95.2%), AIME 2024 (100%), USAMO 2025 (61.9%). Grok 4 demonstrates world-class mathematical reasoning with perfect scores on advanced math competitions."
     benchmark_data:
-      GSM8K: "95.0%"
-      MATH: "60.1%"
+      GSM8K: "95.2%"
+      AIME_2024: "100%"
+      USAMO_2025: "61.9%"
+      MMLU: "92.1%"
     enabled: true
 
   logical_reasoning:
@@ -90,6 +92,6 @@ min_arbiter_score: 0.7
 
 # Notes:
 # - Model identifiers should match the exact model names used by provider SDKs
-# - Provider names must match: "openai", "anthropic", or "google"
+# - Provider names must match: "openai", "anthropic", "google", or "xai"
 # - Enabled flag can be used to temporarily disable specific arbiters
 # - Evaluation criteria weights should sum to 1.0

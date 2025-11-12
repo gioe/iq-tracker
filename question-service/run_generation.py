@@ -183,10 +183,13 @@ def main() -> int:
                 settings.openai_api_key,
                 settings.anthropic_api_key,
                 settings.google_api_key,
+                settings.xai_api_key,
             ]
         ):
             logger.error("No LLM API keys configured!")
-            logger.error("Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY")
+            logger.error(
+                "Set OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY, or XAI_API_KEY"
+            )
             return EXIT_CONFIG_ERROR
 
         # Initialize pipeline
@@ -194,6 +197,7 @@ def main() -> int:
             openai_api_key=settings.openai_api_key,
             anthropic_api_key=settings.anthropic_api_key,
             google_api_key=settings.google_api_key,
+            xai_api_key=settings.xai_api_key,
         )
         logger.info("✓ Pipeline initialized")
 
@@ -210,6 +214,7 @@ def main() -> int:
             openai_api_key=settings.openai_api_key,
             anthropic_api_key=settings.anthropic_api_key,
             google_api_key=settings.google_api_key,
+            xai_api_key=settings.xai_api_key,
         )
         logger.info("✓ Arbiter initialized")
 
