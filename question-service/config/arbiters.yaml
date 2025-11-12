@@ -6,7 +6,7 @@
 #
 # Configuration Structure:
 #   question_type:
-#     model: Model identifier (e.g., "gpt-4", "claude-3-5-sonnet-20241022")
+#     model: Model identifier (e.g., "gpt-4", "claude-sonnet-4-5")
 #     provider: Provider name ("openai", "anthropic", "google")
 #     rationale: Explanation of why this model was chosen
 #     enabled: Whether this arbiter is active (default: true)
@@ -24,7 +24,7 @@ arbiters:
     enabled: true
 
   logical_reasoning:
-    model: "claude-3-5-sonnet-20241022"
+    model: "claude-sonnet-4-5"
     provider: "anthropic"
     rationale: "Best-in-class logical reasoning: HumanEval (93.7%), GPQA (67.2%). Claude 3.5 Sonnet demonstrates superior performance on coding logic and graduate-level reasoning tasks."
     benchmark_data:
@@ -34,7 +34,7 @@ arbiters:
     enabled: true
 
   pattern_recognition:
-    model: "claude-3-5-sonnet-20241022"
+    model: "claude-sonnet-4-5"
     provider: "anthropic"
     rationale: "Superior abstract reasoning: GPQA (67.2%), MMLU (90.4%). Claude 3.5 Sonnet excels at identifying patterns in complex reasoning tasks, significantly outperforming alternatives."
     benchmark_data:
@@ -43,7 +43,7 @@ arbiters:
     enabled: true
 
   spatial_reasoning:
-    model: "claude-3-5-sonnet-20241022"
+    model: "claude-sonnet-4-5"
     provider: "anthropic"
     rationale: "Strong general reasoning capabilities with GPQA (67.2%) and MMLU (90.4%) scores. While spatial-specific benchmarks are limited, Claude 3.5 Sonnet's reasoning strength makes it ideal for spatial tasks."
     benchmark_data:
@@ -52,7 +52,7 @@ arbiters:
     enabled: true
 
   verbal_reasoning:
-    model: "claude-3-5-sonnet-20241022"
+    model: "claude-sonnet-4-5"
     provider: "anthropic"
     rationale: "Exceptional language understanding: MMLU (90.4%), strong performance on HellaSwag and WinoGrande. Claude 3.5 Sonnet leads in natural language reasoning and comprehension tasks."
     benchmark_data:
@@ -61,7 +61,7 @@ arbiters:
     enabled: true
 
   memory:
-    model: "claude-3-5-sonnet-20241022"
+    model: "claude-sonnet-4-5"
     provider: "anthropic"
     rationale: "Outstanding recall and knowledge retention: MMLU (90.4%) with 200K token context window. Claude 3.5 Sonnet combines strong knowledge benchmarks with massive context for memory-intensive evaluation."
     benchmark_data:

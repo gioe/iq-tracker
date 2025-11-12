@@ -37,7 +37,7 @@ class QuestionGenerator:
         anthropic_api_key: Optional[str] = None,
         google_api_key: Optional[str] = None,
         openai_model: str = "gpt-4-turbo-preview",
-        anthropic_model: str = "claude-3-5-sonnet-20241022",
+        anthropic_model: str = "claude-sonnet-4-5",
         google_model: str = "gemini-pro",
     ):
         """Initialize the question generator with LLM provider credentials.

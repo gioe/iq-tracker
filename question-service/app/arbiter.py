@@ -62,7 +62,7 @@ class QuestionArbiter:
         if anthropic_api_key:
             self.providers["anthropic"] = AnthropicProvider(
                 api_key=anthropic_api_key,
-                model="claude-3-5-sonnet-20241022",  # Default model
+                model="claude-sonnet-4-5",  # Default model
             )
             logger.info("Initialized Anthropic provider for arbiter")
 

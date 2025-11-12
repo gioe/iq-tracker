@@ -34,7 +34,7 @@ from app import (  # noqa: E402
 )
 from app.config import settings  # noqa: E402
 from app.logging_config import setup_logging  # noqa: E402
-from app.metrics import GenerationMetrics  # noqa: E402
+from app.metrics import MetricsTracker  # noqa: E402
 from app.models import QuestionType  # noqa: E402
 
 # Exit codes
@@ -165,7 +165,7 @@ def main() -> int:
 
     try:
         # Initialize metrics
-        metrics = GenerationMetrics()
+        metrics = MetricsTracker()
         metrics.start_run()
 
         # Parse question types
@@ -197,8 +197,16 @@ def main() -> int:
         )
         logger.info("✓ Pipeline initialized")
 
-        # Initialize arbiter
+        # Load arbiter configuration
+        from app.arbiter_config import ArbiterConfigLoader
+
+        arbiter_loader = ArbiterConfigLoader(settings.arbiter_config_path)
+        arbiter_loader.load()  # Load the config into the loader
+        logger.info(f"✓ Arbiter config loaded from {settings.arbiter_config_path}")
+
+        # Initialize arbiter (pass the loader, not the config)
         arbiter = QuestionArbiter(
+            arbiter_config=arbiter_loader,
             openai_api_key=settings.openai_api_key,
             anthropic_api_key=settings.anthropic_api_key,
             google_api_key=settings.google_api_key,
@@ -239,11 +247,7 @@ def main() -> int:
         )
         logger.info(f"Duration: {stats['duration_seconds']:.1f}s")
 
-        metrics.record_generation(
-            generated_count=stats["questions_generated"],
-            target_count=stats["target_questions"],
-            duration=stats["duration_seconds"],
-        )
+        # Note: Generation metrics are already tracked by the pipeline internally
 
         if not generated_questions:
             logger.error("No questions generated!")
@@ -264,19 +268,24 @@ def main() -> int:
             logger.info(f"Evaluating question {i}/{len(generated_questions)}...")
 
             try:
-                evaluation = arbiter.evaluate_question(question)
+                evaluated_question = arbiter.evaluate_question(question)
 
-                if evaluation.overall_score >= min_score:
+                if evaluated_question.evaluation.overall_score >= min_score:
                     approved_questions.append(question)
-                    logger.info(f"  ✓ APPROVED (score: {evaluation.overall_score:.2f})")
+                    logger.info(
+                        f"  ✓ APPROVED (score: {evaluated_question.evaluation.overall_score:.2f})"
+                    )
                 else:
                     rejected_questions.append(question)
-                    logger.info(f"  ✗ REJECTED (score: {evaluation.overall_score:.2f})")
+                    logger.info(
+                        f"  ✗ REJECTED (score: {evaluated_question.evaluation.overall_score:.2f})"
+                    )
 
-                metrics.record_evaluation(
-                    question_type=question.question_type.value,
-                    approved=evaluation.overall_score >= min_score,
-                    score=evaluation.overall_score,
+                # Record evaluation metrics
+                metrics.record_evaluation_success(
+                    score=evaluated_question.evaluation.overall_score,
+                    approved=evaluated_question.evaluation.overall_score >= min_score,
+                    arbiter_model=evaluated_question.arbiter_model,
                 )
 
             except Exception as e:
@@ -319,9 +328,9 @@ def main() -> int:
                         duplicate_count += 1
                         logger.info(f"✗ Duplicate: {question.question_text[:60]}...")
 
-                    metrics.record_deduplication(
-                        question_type=question.question_type.value,
+                    metrics.record_duplicate_check(
                         is_duplicate=is_duplicate,
+                        duplicate_type=None,  # Type can be "exact" or "semantic" if available
                     )
 
                 except Exception as e:
@@ -352,17 +361,11 @@ def main() -> int:
                         f"(ID: {question_id})"
                     )
 
-                    metrics.record_insertion(
-                        question_type=question.question_type.value,
-                        success=True,
-                    )
+                    metrics.record_insertion_success(count=1)
 
                 except Exception as e:
                     logger.error(f"✗ Failed to insert question {i}: {e}")
-                    metrics.record_insertion(
-                        question_type=question.question_type.value,
-                        success=False,
-                    )
+                    metrics.record_insertion_failure(error=str(e), count=1)
                     continue
 
             logger.info(
@@ -376,7 +379,7 @@ def main() -> int:
         logger.info("\n" + "=" * 80)
         logger.info("FINAL SUMMARY")
         logger.info("=" * 80)
-        logger.info(f"Total duration: {summary['duration_seconds']:.1f}s")
+        logger.info(f"Total duration: {summary['execution']['duration_seconds']:.1f}s")
         logger.info(f"Generated: {stats['questions_generated']}")
         logger.info(f"Approved by arbiter: {len(approved_questions)}")
         logger.info(f"Unique: {len(unique_questions)}")
