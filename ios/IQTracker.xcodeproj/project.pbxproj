@@ -51,6 +51,7 @@
 		899C55ED04C9CB82D0982A14 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 741695D7A49F00677C7CADBD /* APIError.swift */; };
 		8F162E02A7B1DF68E089D685 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80193C5570A9CD7D1AFA9386 /* AuthService.swift */; };
 		91429C7C16E238E0C072F0E3 /* KeychainStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E09B407D867D4141B0DAB81 /* KeychainStorage.swift */; };
+		52B0B8DC01B04B3B8FF79EEF /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53CA2AD619C442D69F44A581 /* NotificationService.swift */; };
 		941A5FDD13415534E0F0FA1F /* RequestInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A60BF6153CD6BF7A06AAD263 /* RequestInterceptor.swift */; };
 		9469FACC6CB7EE0D538EEFED /* QuestionNavigationGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = E764D56ADDDFB5126C75B29F /* QuestionNavigationGrid.swift */; };
 		95C81A1F6CCE0B3C5FB3D25E /* ViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565BB90693929F5317496786 /* ViewModelProtocol.swift */; };
@@ -146,6 +147,7 @@
 		7ACE99643E658A7B23DA53C3 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		7E54FA66E4F699B5F09EC5DA /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		80193C5570A9CD7D1AFA9386 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		53CA2AD619C442D69F44A581 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		830D779DEE0CF101CA007C56 /* QuestionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionCardView.swift; sourceTree = "<group>"; };
 		838E36535E4A65E426992EAE /* TestProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestProgressView.swift; sourceTree = "<group>"; };
 		86E43C061ABEE2ECA98EAFF1 /* TestSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSession.swift; sourceTree = "<group>"; };
