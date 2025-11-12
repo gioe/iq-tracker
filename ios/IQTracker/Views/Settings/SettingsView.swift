@@ -25,16 +25,18 @@ struct SettingsView: View {
                     Text("Account")
                 }
 
+                // Notifications Section
+                Section {
+                    NotificationSettingsView()
+                } header: {
+                    Text("Notifications")
+                } footer: {
+                    Text("Receive reminders when it's time to take your next IQ test (every 6 months)")
+                        .font(.caption)
+                }
+
                 // App Settings Section
                 Section {
-                    HStack {
-                        Text("Notifications")
-                        Spacer()
-                        Text("Coming soon")
-                            .foregroundColor(.secondary)
-                            .font(.caption)
-                    }
-
                     HStack {
                         Text("App Version")
                         Spacer()
