@@ -89,6 +89,9 @@ class AuthManager: ObservableObject, AuthManagerProtocol {
     func logout() async {
         isLoading = true
 
+        // Unregister device token first
+        await NotificationManager.shared.unregisterDeviceToken()
+
         do {
             try await authService.logout()
         } catch {

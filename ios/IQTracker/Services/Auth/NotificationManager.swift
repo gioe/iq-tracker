@@ -1,0 +1,232 @@
+import Combine
+import Foundation
+import UIKit
+import UserNotifications
+
+/// Manager for coordinating push notification permissions, device tokens, and backend synchronization
+@MainActor
+class NotificationManager: ObservableObject {
+    // MARK: - Singleton
+
+    static let shared = NotificationManager()
+
+    // MARK: - Published Properties
+
+    /// Current notification authorization status
+    @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
+
+    /// Whether the device token has been successfully registered with the backend
+    @Published private(set) var isDeviceTokenRegistered: Bool = false
+
+    // MARK: - Private Properties
+
+    private let notificationService: NotificationServiceProtocol
+    private nonisolated(unsafe) let authManager: AuthManager
+    private var cancellables = Set<AnyCancellable>()
+
+    /// Cached device token (stored until user is authenticated)
+    private var pendingDeviceToken: String?
+
+    /// UserDefaults key for storing device token
+    private let deviceTokenKey = "com.iqtracker.deviceToken"
+
+    /// Whether we're currently processing a device token registration
+    private var isRegisteringToken = false
+
+    // MARK: - Initialization
+
+    nonisolated init(
+        notificationService: NotificationServiceProtocol = NotificationService.shared
+    ) {
+        self.notificationService = notificationService
+        authManager = AuthManager.shared
+
+        // Initialize on main actor
+        Task { @MainActor in
+            // Load cached device token
+            self.loadCachedDeviceToken()
+
+            // Observe authentication state changes
+            self.observeAuthStateChanges()
+
+            // Check current authorization status
+            await self.checkAuthorizationStatus()
+        }
+    }
+
+    // MARK: - Public Methods
+
+    /// Request notification authorization from the system
+    /// - Returns: Whether authorization was granted
+    @discardableResult
+    func requestAuthorization() async -> Bool {
+        do {
+            let granted = try await UNUserNotificationCenter.current()
+                .requestAuthorization(options: [.alert, .sound, .badge])
+
+            await checkAuthorizationStatus()
+
+            if granted {
+                // Register for remote notifications
+                await MainActor.run {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            }
+
+            return granted
+
+        } catch {
+            print("❌ [NotificationManager] Authorization request failed: \(error.localizedDescription)")
+            return false
+        }
+    }
+
+    /// Check and update current authorization status
+    func checkAuthorizationStatus() async {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        authorizationStatus = settings.authorizationStatus
+    }
+
+    /// Handle device token received from APNs
+    /// - Parameter deviceToken: The device token data
+    func didReceiveDeviceToken(_ deviceToken: Data) {
+        let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        print("📱 [NotificationManager] Received device token: \(tokenString)")
+
+        // Cache the token
+        cacheDeviceToken(tokenString)
+
+        // Try to register with backend if authenticated
+        Task {
+            await registerDeviceTokenIfPossible(tokenString)
+        }
+    }
+
+    /// Handle device token registration failure
+    /// - Parameter error: The error that occurred
+    func didFailToRegisterForRemoteNotifications(error: Error) {
+        print("❌ [NotificationManager] Failed to register for remote notifications: \(error.localizedDescription)")
+
+        // Clear cached token on failure
+        clearCachedDeviceToken()
+        isDeviceTokenRegistered = false
+    }
+
+    /// Unregister device token from backend (called on logout)
+    func unregisterDeviceToken() async {
+        guard isDeviceTokenRegistered else {
+            print("ℹ️ [NotificationManager] No device token to unregister")
+            return
+        }
+
+        do {
+            let response = try await notificationService.unregisterDeviceToken()
+            print("✅ [NotificationManager] Device token unregistered: \(response.message)")
+
+            isDeviceTokenRegistered = false
+            clearCachedDeviceToken()
+
+        } catch {
+            print("❌ [NotificationManager] Failed to unregister device token: \(error.localizedDescription)")
+            // Even if backend fails, clear local state
+            isDeviceTokenRegistered = false
+            clearCachedDeviceToken()
+        }
+    }
+
+    /// Retry registration with cached device token (useful after failed attempts)
+    func retryDeviceTokenRegistration() async {
+        guard let token = pendingDeviceToken ?? getCachedDeviceToken() else {
+            print("ℹ️ [NotificationManager] No device token available to retry")
+            return
+        }
+
+        await registerDeviceTokenIfPossible(token)
+    }
+
+    // MARK: - Private Methods
+
+    /// Observe authentication state changes to handle device token registration
+    private func observeAuthStateChanges() {
+        authManager.$isAuthenticated
+            .sink { [weak self] isAuthenticated in
+                Task { @MainActor [weak self] in
+                    guard let self else { return }
+
+                    if isAuthenticated {
+                        // User logged in - try to register any pending device token
+                        await retryDeviceTokenRegistration()
+                    } else {
+                        // User logged out - clear registration state
+                        isDeviceTokenRegistered = false
+                    }
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    /// Register device token with backend if user is authenticated
+    /// - Parameter token: The device token string
+    private func registerDeviceTokenIfPossible(_ token: String) async {
+        // Guard against concurrent registration attempts
+        guard !isRegisteringToken else {
+            print("ℹ️ [NotificationManager] Registration already in progress")
+            return
+        }
+
+        // Check if user is authenticated
+        guard authManager.isAuthenticated else {
+            print("ℹ️ [NotificationManager] User not authenticated, caching token for later")
+            pendingDeviceToken = token
+            return
+        }
+
+        // Check if already registered
+        guard !isDeviceTokenRegistered else {
+            print("ℹ️ [NotificationManager] Device token already registered")
+            return
+        }
+
+        isRegisteringToken = true
+
+        do {
+            let response = try await notificationService.registerDeviceToken(token)
+            print("✅ [NotificationManager] Device token registered: \(response.message)")
+
+            isDeviceTokenRegistered = true
+            pendingDeviceToken = nil
+
+        } catch {
+            print("❌ [NotificationManager] Failed to register device token: \(error.localizedDescription)")
+            // Keep token cached for retry
+            pendingDeviceToken = token
+            isDeviceTokenRegistered = false
+        }
+
+        isRegisteringToken = false
+    }
+
+    /// Cache device token to UserDefaults
+    /// - Parameter token: The device token string
+    private func cacheDeviceToken(_ token: String) {
+        UserDefaults.standard.set(token, forKey: deviceTokenKey)
+        pendingDeviceToken = token
+    }
+
+    /// Get cached device token from UserDefaults
+    /// - Returns: Cached device token if available
+    private func getCachedDeviceToken() -> String? {
+        UserDefaults.standard.string(forKey: deviceTokenKey)
+    }
+
+    /// Load cached device token from UserDefaults
+    private func loadCachedDeviceToken() {
+        pendingDeviceToken = getCachedDeviceToken()
+    }
+
+    /// Clear cached device token from UserDefaults
+    private func clearCachedDeviceToken() {
+        UserDefaults.standard.removeObject(forKey: deviceTokenKey)
+        pendingDeviceToken = nil
+    }
+}
