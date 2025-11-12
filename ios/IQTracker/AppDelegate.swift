@@ -2,10 +2,15 @@ import UIKit
 import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate {
+    private let notificationService = NotificationService.shared
+
     func application(
         _: UIApplication,
         didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        // Set notification delegate
+        UNUserNotificationCenter.current().delegate = self
+
         // Register for remote notifications
         registerForPushNotifications()
         return true
@@ -15,7 +20,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
     func registerForPushNotifications() {
         UNUserNotificationCenter.current()
-            .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+            .requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+                if let error {
+                    print("Push notification permission error: \(error.localizedDescription)")
+                    return
+                }
+
                 print("Push notification permission granted: \(granted)")
                 guard granted else { return }
 
@@ -35,8 +45,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         let token = tokenParts.joined()
         print("Device Token: \(token)")
 
-        // NOTE: Device token will be sent to backend in P7-002
-        // This will be implemented when we add the device token registration endpoint
+        // Register device token with backend
+        Task {
+            do {
+                let response = try await notificationService.registerDeviceToken(token)
+                print("Device token registered successfully: \(response.message)")
+            } catch {
+                print("Failed to register device token with backend: \(error)")
+            }
+        }
     }
 
     func application(
@@ -53,10 +70,94 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didReceiveRemoteNotification userInfo: [AnyHashable: Any],
         fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
     ) {
-        // Handle received push notification
+        // Handle received push notification when app is in background
         print("Received remote notification: \(userInfo)")
 
-        // NOTE: Notification handling will be implemented in P7-005
+        // Handle notification data
+        handleNotificationData(userInfo)
+
         completionHandler(.newData)
     }
+
+    // MARK: - Notification Handling
+
+    /// Handle notification data and perform appropriate actions
+    /// - Parameter userInfo: Notification payload
+    private func handleNotificationData(_ userInfo: [AnyHashable: Any]) {
+        // Extract notification type and data
+        guard let notificationType = userInfo["type"] as? String else {
+            print("No notification type found in payload")
+            return
+        }
+
+        print("Handling notification of type: \(notificationType)")
+
+        // Handle different notification types
+        switch notificationType {
+        case "test_reminder":
+            // Test reminder notification - user should take a new test
+            print("Test reminder notification received")
+            // Navigation will be handled when user taps the notification
+            // (see userNotificationCenter(_:didReceive:withCompletionHandler:))
+
+        default:
+            print("Unknown notification type: \(notificationType)")
+        }
+    }
+}
+
+// MARK: - UNUserNotificationCenterDelegate
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    /// Handle notifications when app is in foreground
+    func userNotificationCenter(
+        _: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        // Show notification banner, sound, and badge even when app is in foreground
+        print("Received notification in foreground: \(notification.request.content.userInfo)")
+
+        // Handle notification data
+        handleNotificationData(notification.request.content.userInfo)
+
+        // Present the notification to the user
+        if #available(iOS 14.0, *) {
+            completionHandler([.banner, .sound, .badge])
+        } else {
+            completionHandler([.alert, .sound, .badge])
+        }
+    }
+
+    /// Handle notification taps (user tapped on notification)
+    func userNotificationCenter(
+        _: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        print("User tapped notification: \(response.notification.request.content.userInfo)")
+
+        // Handle notification data
+        let userInfo = response.notification.request.content.userInfo
+        handleNotificationData(userInfo)
+
+        // Post notification to navigate to appropriate screen
+        // This will be handled by the view layer
+        if let notificationType = userInfo["type"] as? String {
+            NotificationCenter.default.post(
+                name: .notificationTapped,
+                object: nil,
+                userInfo: ["type": notificationType, "payload": userInfo]
+            )
+        }
+
+        completionHandler()
+    }
+}
+
+// MARK: - Notification Names
+
+extension Notification.Name {
+    /// Posted when user taps on a push notification
+    static let notificationTapped = Notification.Name("notificationTapped")
 }
