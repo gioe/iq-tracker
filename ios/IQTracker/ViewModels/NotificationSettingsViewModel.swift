@@ -20,17 +20,26 @@ class NotificationSettingsViewModel: BaseViewModel {
     // MARK: - Private Properties
 
     private let notificationService: NotificationServiceProtocol
+    private let notificationManager: NotificationManager
     private let authManager: AuthManager
+    private var viewCancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization
 
     init(
         notificationService: NotificationServiceProtocol = NotificationService.shared,
-        authManager: AuthManager = AuthManager.shared
+        notificationManager: NotificationManager = NotificationManager.shared
     ) {
         self.notificationService = notificationService
-        self.authManager = authManager
+        self.notificationManager = notificationManager
+        authManager = AuthManager.shared
         super.init()
+
+        // Observe app lifecycle to check permission changes
+        observeAppLifecycle()
+
+        // Observe authorization status from NotificationManager
+        observeAuthorizationStatus()
     }
 
     // MARK: - Public Methods
@@ -98,24 +107,12 @@ class NotificationSettingsViewModel: BaseViewModel {
 
     /// Request system notification permission
     func requestSystemPermission() async {
-        do {
-            let granted = try await UNUserNotificationCenter.current()
-                .requestAuthorization(options: [.alert, .sound, .badge])
+        let granted = await notificationManager.requestAuthorization()
+        systemPermissionGranted = granted
 
-            systemPermissionGranted = granted
-
-            if granted {
-                // Register for remote notifications
-                await MainActor.run {
-                    UIApplication.shared.registerForRemoteNotifications()
-                }
-
-                // Now enable in backend
-                await toggleNotifications()
-            }
-
-        } catch {
-            handleError(error)
+        if granted {
+            // Now enable in backend
+            await toggleNotifications()
         }
     }
 
@@ -148,5 +145,88 @@ class NotificationSettingsViewModel: BaseViewModel {
     /// Whether to show a warning about system permissions
     var showPermissionWarning: Bool {
         notificationEnabled && !systemPermissionGranted
+    }
+
+    // MARK: - Private Methods
+
+    /// Observe app lifecycle events to check for permission changes
+    private func observeAppLifecycle() {
+        // Check permission status when app becomes active (user may have changed it in Settings)
+        NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
+            .sink { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    await self?.checkSystemPermission()
+                }
+            }
+            .store(in: &viewCancellables)
+
+        // Also check when app enters foreground
+        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+            .sink { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    await self?.checkSystemPermission()
+                }
+            }
+            .store(in: &viewCancellables)
+    }
+
+    /// Observe authorization status changes from NotificationManager
+    private func observeAuthorizationStatus() {
+        notificationManager.$authorizationStatus
+            .sink { [weak self] status in
+                Task { @MainActor [weak self] in
+                    guard let self else { return }
+                    systemPermissionGranted = (status == .authorized)
+
+                    // Handle different authorization states
+                    await handleAuthorizationStatus(status)
+                }
+            }
+            .store(in: &viewCancellables)
+    }
+
+    /// Handle different authorization statuses
+    /// - Parameter status: The current authorization status
+    private func handleAuthorizationStatus(_ status: UNAuthorizationStatus) async {
+        switch status {
+        case .notDetermined:
+            // User hasn't been asked yet - no action needed
+            print("ℹ️ [NotificationSettings] Notification permission not determined")
+
+        case .denied:
+            // User explicitly denied - show warning if backend thinks it's enabled
+            print("⚠️ [NotificationSettings] Notification permission denied")
+            if notificationEnabled {
+                // Sync backend to disabled state
+                await disableBackendNotifications()
+            }
+
+        case .authorized:
+            // User granted permission - ensure device token is registered
+            print("✅ [NotificationSettings] Notification permission authorized")
+            await notificationManager.retryDeviceTokenRegistration()
+
+        case .provisional:
+            // Provisional authorization (quiet notifications) - treat as authorized
+            print("ℹ️ [NotificationSettings] Notification permission provisional")
+            await notificationManager.retryDeviceTokenRegistration()
+
+        case .ephemeral:
+            // App Clip authorization - treat as authorized
+            print("ℹ️ [NotificationSettings] Notification permission ephemeral")
+
+        @unknown default:
+            print("⚠️ [NotificationSettings] Unknown authorization status: \(status.rawValue)")
+        }
+    }
+
+    /// Disable notifications in backend without updating UI toggle
+    private func disableBackendNotifications() async {
+        do {
+            let response = try await notificationService.updateNotificationPreferences(enabled: false)
+            notificationEnabled = response.notificationEnabled
+        } catch {
+            print("❌ [NotificationSettings] Failed to sync backend notification state: \(error)")
+        }
     }
 }

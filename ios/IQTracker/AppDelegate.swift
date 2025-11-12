@@ -2,7 +2,7 @@ import UIKit
 import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate {
-    private let notificationService = NotificationService.shared
+    private let notificationManager = NotificationManager.shared
 
     func application(
         _: UIApplication,
@@ -11,28 +11,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Set notification delegate
         UNUserNotificationCenter.current().delegate = self
 
-        // Register for remote notifications
-        registerForPushNotifications()
+        // Note: We don't request notification permissions at launch anymore
+        // Permissions are requested when user explicitly enables notifications in Settings
+        // This provides better UX and follows Apple's guidelines
+
         return true
-    }
-
-    // MARK: - Push Notification Registration
-
-    func registerForPushNotifications() {
-        UNUserNotificationCenter.current()
-            .requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-                if let error {
-                    print("Push notification permission error: \(error.localizedDescription)")
-                    return
-                }
-
-                print("Push notification permission granted: \(granted)")
-                guard granted else { return }
-
-                DispatchQueue.main.async {
-                    UIApplication.shared.registerForRemoteNotifications()
-                }
-            }
     }
 
     // MARK: - Remote Notification Callbacks
@@ -41,18 +24,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
-        let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
-        let token = tokenParts.joined()
-        print("Device Token: \(token)")
-
-        // Register device token with backend
-        Task {
-            do {
-                let response = try await notificationService.registerDeviceToken(token)
-                print("Device token registered successfully: \(response.message)")
-            } catch {
-                print("Failed to register device token with backend: \(error)")
-            }
+        // Delegate to NotificationManager for proper handling
+        Task { @MainActor in
+            notificationManager.didReceiveDeviceToken(deviceToken)
         }
     }
 
@@ -60,7 +34,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _: UIApplication,
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
-        print("Failed to register for remote notifications: \(error.localizedDescription)")
+        // Delegate to NotificationManager for proper handling
+        Task { @MainActor in
+            notificationManager.didFailToRegisterForRemoteNotifications(error: error)
+        }
     }
 
     // MARK: - Handle Received Notifications
