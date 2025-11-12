@@ -1,0 +1,12 @@
+{
+  "Simulator Target Bundle": "com.iqtracker.app",
+  "aps": {
+    "alert": {
+      "title": "Silent Test Reminder",
+      "body": "This notification has no sound"
+    },
+    "badge": 2
+  },
+  "type": "test_reminder",
+  "user_id": "456"
+}
