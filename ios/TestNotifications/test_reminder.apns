@@ -1,0 +1,13 @@
+{
+  "Simulator Target Bundle": "com.iqtracker.app",
+  "aps": {
+    "alert": {
+      "title": "Time for Your IQ Test!",
+      "body": "Hi Test User, it's been 6 months! Ready to track your cognitive progress?"
+    },
+    "badge": 1,
+    "sound": "default"
+  },
+  "type": "test_reminder",
+  "user_id": "123"
+}

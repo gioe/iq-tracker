@@ -1,0 +1,9 @@
+{
+  "Simulator Target Bundle": "com.iqtracker.app",
+  "aps": {
+    "alert": "Simple notification text - Time for your IQ test!",
+    "badge": 1,
+    "sound": "default"
+  },
+  "type": "test_reminder"
+}
