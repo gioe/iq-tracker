@@ -501,6 +501,7 @@ class TestSubmitTest:
     ):
         """Test that responses are properly isolated between sessions."""
         from app.models.models import Response, TestSession, TestStatus
+        from datetime import datetime, timedelta
 
         # Start first test
         start1 = client.post("/v1/test/start?question_count=2", headers=auth_headers)
@@ -516,6 +517,13 @@ class TestSubmitTest:
             ],
         }
         client.post("/v1/test/submit", json=submission1, headers=auth_headers)
+
+        # Backdate the first session completion to bypass 6-month cadence check
+        session1 = (
+            db_session.query(TestSession).filter(TestSession.id == session1_id).first()
+        )
+        session1.completed_at = datetime.utcnow() - timedelta(days=181)
+        db_session.commit()
 
         # Start second test (different questions since first are now seen)
         start2 = client.post("/v1/test/start?question_count=2", headers=auth_headers)

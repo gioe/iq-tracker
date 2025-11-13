@@ -177,6 +177,115 @@ class TestStartTest:
         assert test_session.user_id == test_user.id
         assert test_session.status.value == "in_progress"
 
+    def test_start_test_enforces_six_month_cadence(
+        self, client, auth_headers, test_questions, db_session
+    ):
+        """Test that users cannot start a new test within 6 months of last completed test."""
+        from app.models import TestSession, User
+        from app.models.models import TestStatus
+        from datetime import datetime, timedelta
+
+        test_user = (
+            db_session.query(User).filter(User.email == "test@example.com").first()
+        )
+
+        # Create a completed test session from 30 days ago (within 6-month window)
+        completed_session = TestSession(
+            user_id=test_user.id,
+            status=TestStatus.COMPLETED,
+            started_at=datetime.utcnow() - timedelta(days=30, hours=1),
+            completed_at=datetime.utcnow() - timedelta(days=30),
+        )
+        db_session.add(completed_session)
+        db_session.commit()
+
+        # Try to start a new test
+        response = client.post("/v1/test/start?question_count=2", headers=auth_headers)
+
+        # Should be blocked
+        assert response.status_code == 400
+        detail = response.json()["detail"]
+        assert "180 days" in detail or "6 months" in detail
+        assert "days remaining" in detail
+
+    def test_start_test_allows_test_after_six_months(
+        self, client, auth_headers, test_questions, db_session
+    ):
+        """Test that users CAN start a new test after 6 months have passed."""
+        from app.models import TestSession, User, UserQuestion
+        from app.models.models import TestStatus
+        from datetime import datetime, timedelta
+
+        test_user = (
+            db_session.query(User).filter(User.email == "test@example.com").first()
+        )
+
+        # Mark 2 questions as seen (simulate previous test from 181 days ago)
+        old_seen_at = datetime.utcnow() - timedelta(days=181)
+        user_question_1 = UserQuestion(
+            user_id=test_user.id,
+            question_id=test_questions[0].id,
+            seen_at=old_seen_at,
+        )
+        user_question_2 = UserQuestion(
+            user_id=test_user.id,
+            question_id=test_questions[1].id,
+            seen_at=old_seen_at,
+        )
+        db_session.add(user_question_1)
+        db_session.add(user_question_2)
+
+        # Create a completed test session from 181 days ago (outside 6-month window)
+        completed_session = TestSession(
+            user_id=test_user.id,
+            status=TestStatus.COMPLETED,
+            started_at=datetime.utcnow() - timedelta(days=181, hours=1),
+            completed_at=datetime.utcnow() - timedelta(days=181),
+        )
+        db_session.add(completed_session)
+        db_session.commit()
+
+        # Try to start a new test (should succeed and get questions 2 and 3)
+        response = client.post("/v1/test/start?question_count=2", headers=auth_headers)
+
+        # Should succeed
+        assert response.status_code == 200
+        data = response.json()
+        assert "session" in data
+        assert data["session"]["status"] == "in_progress"
+        assert data["total_questions"] == 2  # Should get 2 unseen questions
+
+    def test_start_test_ignores_abandoned_sessions_for_cadence(
+        self, client, auth_headers, test_questions, db_session
+    ):
+        """Test that abandoned sessions don't count toward 6-month cadence."""
+        from app.models import TestSession, User
+        from app.models.models import TestStatus
+        from datetime import datetime, timedelta
+
+        test_user = (
+            db_session.query(User).filter(User.email == "test@example.com").first()
+        )
+
+        # Create an abandoned test session from 30 days ago
+        abandoned_session = TestSession(
+            user_id=test_user.id,
+            status=TestStatus.ABANDONED,
+            started_at=datetime.utcnow() - timedelta(days=30, hours=1),
+            completed_at=datetime.utcnow() - timedelta(days=30),
+        )
+        db_session.add(abandoned_session)
+        db_session.commit()
+
+        # Try to start a new test
+        response = client.post("/v1/test/start?question_count=2", headers=auth_headers)
+
+        # Should succeed (abandoned sessions don't count)
+        assert response.status_code == 200
+        data = response.json()
+        assert "session" in data
+        assert data["session"]["status"] == "in_progress"
+
 
 class TestGetTestSession:
     """Tests for GET /v1/test/session/{session_id} endpoint."""
