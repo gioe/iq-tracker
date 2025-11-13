@@ -20,6 +20,7 @@ from .providers.anthropic_provider import AnthropicProvider
 from .providers.base import BaseLLMProvider
 from .providers.google_provider import GoogleProvider
 from .providers.openai_provider import OpenAIProvider
+from .providers.xai_provider import XAIProvider
 
 logger = logging.getLogger(__name__)
 
@@ -36,9 +37,11 @@ class QuestionGenerator:
         openai_api_key: Optional[str] = None,
         anthropic_api_key: Optional[str] = None,
         google_api_key: Optional[str] = None,
+        xai_api_key: Optional[str] = None,
         openai_model: str = "gpt-4-turbo-preview",
-        anthropic_model: str = "claude-3-5-sonnet-20241022",
+        anthropic_model: str = "claude-sonnet-4-5",
         google_model: str = "gemini-pro",
+        xai_model: str = "grok-4",
     ):
         """Initialize the question generator with LLM provider credentials.
 
@@ -46,9 +49,11 @@ class QuestionGenerator:
             openai_api_key: OpenAI API key (optional)
             anthropic_api_key: Anthropic API key (optional)
             google_api_key: Google API key (optional)
+            xai_api_key: xAI (Grok) API key (optional)
             openai_model: OpenAI model to use
             anthropic_model: Anthropic model to use
             google_model: Google model to use
+            xai_model: xAI model to use
         """
         self.providers: Dict[str, BaseLLMProvider] = {}
 
@@ -70,6 +75,10 @@ class QuestionGenerator:
                 api_key=google_api_key, model=google_model
             )
             logger.info(f"Initialized Google provider with model {google_model}")
+
+        if xai_api_key:
+            self.providers["xai"] = XAIProvider(api_key=xai_api_key, model=xai_model)
+            logger.info(f"Initialized xAI provider with model {xai_model}")
 
         if not self.providers:
             raise ValueError("At least one LLM provider API key must be provided")

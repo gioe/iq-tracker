@@ -26,7 +26,7 @@ class ArbiterModel(BaseModel):
     """
 
     model: str = Field(..., min_length=1)
-    provider: str = Field(..., pattern="^(openai|anthropic|google)$")
+    provider: str = Field(..., pattern="^(openai|anthropic|google|xai)$")
     rationale: str = Field(..., min_length=1)
     enabled: bool = True
 
@@ -34,7 +34,7 @@ class ArbiterModel(BaseModel):
     @classmethod
     def validate_provider(cls, v: str) -> str:
         """Validate provider is one of the supported options."""
-        valid_providers = {"openai", "anthropic", "google"}
+        valid_providers = {"openai", "anthropic", "google", "xai"}
         if v not in valid_providers:
             raise ValueError(f"Provider must be one of {valid_providers}, got '{v}'")
         return v

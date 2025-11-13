@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     openai_api_key: Optional[str] = None
     anthropic_api_key: Optional[str] = None
     google_api_key: Optional[str] = None
+    xai_api_key: Optional[str] = None
 
     # Question Generation Settings
     questions_per_run: int = 50

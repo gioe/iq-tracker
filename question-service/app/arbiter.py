@@ -20,6 +20,7 @@ from .providers.anthropic_provider import AnthropicProvider
 from .providers.base import BaseLLMProvider
 from .providers.google_provider import GoogleProvider
 from .providers.openai_provider import OpenAIProvider
+from .providers.xai_provider import XAIProvider
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,7 @@ class QuestionArbiter:
         openai_api_key: Optional[str] = None,
         anthropic_api_key: Optional[str] = None,
         google_api_key: Optional[str] = None,
+        xai_api_key: Optional[str] = None,
     ):
         """Initialize the question arbiter.
 
@@ -45,6 +47,7 @@ class QuestionArbiter:
             openai_api_key: OpenAI API key (optional)
             anthropic_api_key: Anthropic API key (optional)
             google_api_key: Google API key (optional)
+            xai_api_key: xAI (Grok) API key (optional)
 
         Raises:
             ValueError: If no API keys are provided
@@ -62,7 +65,7 @@ class QuestionArbiter:
         if anthropic_api_key:
             self.providers["anthropic"] = AnthropicProvider(
                 api_key=anthropic_api_key,
-                model="claude-3-5-sonnet-20241022",  # Default model
+                model="claude-sonnet-4-5",  # Default model
             )
             logger.info("Initialized Anthropic provider for arbiter")
 
@@ -71,6 +74,12 @@ class QuestionArbiter:
                 api_key=google_api_key, model="gemini-pro"  # Default model
             )
             logger.info("Initialized Google provider for arbiter")
+
+        if xai_api_key:
+            self.providers["xai"] = XAIProvider(
+                api_key=xai_api_key, model="grok-4"  # Default model
+            )
+            logger.info("Initialized xAI provider for arbiter")
 
         if not self.providers:
             raise ValueError(

@@ -1,12 +1,15 @@
 """Anthropic LLM provider integration."""
 
 import json
+import logging
 from typing import Any, Dict
 
 import anthropic
 from anthropic import Anthropic
 
 from .base import BaseLLMProvider
+
+logger = logging.getLogger(__name__)
 
 
 class AnthropicProvider(BaseLLMProvider):
@@ -110,8 +113,21 @@ class AnthropicProvider(BaseLLMProvider):
             # Extract text from response
             if response.content and len(response.content) > 0:
                 content = response.content[0].text
+                logger.debug(f"Anthropic API response content: {content[:500]}")
+
+                # Strip markdown code fences if present
+                content = content.strip()
+                if content.startswith("```json"):
+                    content = content[7:]  # Remove ```json
+                elif content.startswith("```"):
+                    content = content[3:]  # Remove ```
+                if content.endswith("```"):
+                    content = content[:-3]  # Remove trailing ```
+                content = content.strip()
+
                 return json.loads(content)
 
+            logger.warning("Anthropic API returned empty response")
             return {}
 
         except anthropic.AnthropicError as e:

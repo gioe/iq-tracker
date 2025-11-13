@@ -31,6 +31,7 @@ class QuestionGenerationPipeline:
         openai_api_key: Optional[str] = None,
         anthropic_api_key: Optional[str] = None,
         google_api_key: Optional[str] = None,
+        xai_api_key: Optional[str] = None,
     ):
         """Initialize the question generation pipeline.
 
@@ -38,17 +39,20 @@ class QuestionGenerationPipeline:
             openai_api_key: OpenAI API key (uses settings if not provided)
             anthropic_api_key: Anthropic API key (uses settings if not provided)
             google_api_key: Google API key (uses settings if not provided)
+            xai_api_key: xAI (Grok) API key (uses settings if not provided)
         """
         # Use provided keys or fall back to settings
         self.openai_key = openai_api_key or settings.openai_api_key
         self.anthropic_key = anthropic_api_key or settings.anthropic_api_key
         self.google_key = google_api_key or settings.google_api_key
+        self.xai_key = xai_api_key or settings.xai_api_key
 
         # Initialize generator
         self.generator = QuestionGenerator(
             openai_api_key=self.openai_key,
             anthropic_api_key=self.anthropic_key,
             google_api_key=self.google_key,
+            xai_api_key=self.xai_key,
         )
 
         logger.info("Question generation pipeline initialized")
