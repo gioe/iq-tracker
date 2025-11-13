@@ -4,7 +4,7 @@ Test session management endpoints.
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 from app.models import get_db, User, Question, TestSession, UserQuestion
@@ -23,6 +23,7 @@ from app.schemas.responses import (
 )
 from app.core.auth import get_current_user
 from app.core.scoring import calculate_iq_score
+from app.core.config import settings
 
 router = APIRouter()
 
@@ -70,6 +71,35 @@ def start_test(
             status_code=400,
             detail=f"User already has an active test session (ID: {active_session.id}). "
             "Please complete or abandon the existing session before starting a new one.",
+        )
+
+    # Check 6-month test cadence: user cannot take another test within 180 days
+    # of their last completed test
+    cadence_cutoff = datetime.utcnow() - timedelta(days=settings.TEST_CADENCE_DAYS)
+    recent_completed_session = (
+        db.query(TestSession)
+        .filter(
+            TestSession.user_id == current_user.id,
+            TestSession.status == TestStatus.COMPLETED,
+            TestSession.completed_at > cadence_cutoff,
+        )
+        .order_by(TestSession.completed_at.desc())
+        .first()
+    )
+
+    if recent_completed_session:
+        # Calculate next eligible date
+        next_eligible = recent_completed_session.completed_at + timedelta(
+            days=settings.TEST_CADENCE_DAYS
+        )
+        days_remaining = (next_eligible - datetime.utcnow()).days + 1  # Round up
+
+        raise HTTPException(
+            status_code=400,
+            detail=f"You must wait {settings.TEST_CADENCE_DAYS} days (6 months) between tests. "
+            f"Your last test was completed on {recent_completed_session.completed_at.strftime('%Y-%m-%d')}. "
+            f"You can take your next test on {next_eligible.strftime('%Y-%m-%d')} "
+            f"({days_remaining} days remaining).",
         )
 
     # Fetch unseen questions

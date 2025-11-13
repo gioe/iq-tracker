@@ -591,7 +591,7 @@ XAI_API_KEY=xai-...
 - [x] E2E-2.1: Starting a new test session (first test) - 🐛 FIXED: Pydantic schema expected List but DB had Dict for answer_options, changed schema to Dict[str, str]
 - [ ] E2E-2.2: Answering questions and local storage (requires iOS app)
 - [x] E2E-2.3: Submitting completed test and score calculation (15/20 correct = 75%, IQ score: 108, all records saved correctly)
-- [ ] E2E-2.4: Blocking second test within 6-month window
+- [x] E2E-2.4: Blocking second test within 6-month window - ✅ Implemented 6-month cadence enforcement. Users blocked from taking tests within 180 days of last completed test. Abandoned tests don't count toward cadence.
 
 **History & Analytics**
 - [ ] E2E-3.1: Viewing test history list
