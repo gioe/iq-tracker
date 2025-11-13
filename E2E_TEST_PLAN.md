@@ -581,40 +581,42 @@ XAI_API_KEY=xai-...
 
 ### Execution Log
 
-| Test Case | Status | Tester | Date | Notes |
-|-----------|--------|--------|------|-------|
-| 1.1 Registration | ⏸️ Pending | - | - | - |
-| 1.2 Login | ⏸️ Pending | - | - | - |
-| 1.3 Token Refresh | ⏸️ Pending | - | - | - |
-| 1.4 Logout | ⏸️ Pending | - | - | - |
-| 2.1 Request Test | ⏸️ Pending | - | - | - |
-| 2.2 Answer Questions | ⏸️ Pending | - | - | - |
-| 2.3 Submission | ⏸️ Pending | - | - | - |
-| 2.4 Abandonment | ⏸️ Pending | - | - | - |
-| 3.1 History List | ⏸️ Pending | - | - | - |
-| 3.2 Trend Chart | ⏸️ Pending | - | - | - |
-| 3.3 Detailed Results | ⏸️ Pending | - | - | - |
-| 3.4 Empty State | ⏸️ Pending | - | - | - |
-| 4.1 Permission Request | ⏸️ Pending | - | - | - |
-| 4.2 Token Registration | ⏸️ Pending | - | - | - |
-| 4.3 Scheduling | ⏸️ Pending | - | - | - |
-| 4.4 Delivery | ⏸️ Pending | - | - | - |
-| 4.5 Opt-Out | ⏸️ Pending | - | - | - |
-| 5.1 Generate Math (Grok) | ⏸️ Pending | - | - | - |
-| 5.2 Generate All Types | ⏸️ Pending | - | - | - |
-| 5.3 Deduplication | ⏸️ Pending | - | - | - |
-| 5.4 Arbiter QC | ⏸️ Pending | - | - | - |
-| 6.1 Full Data Flow | ⏸️ Pending | - | - | - |
-| 6.2 Question Pool | ⏸️ Pending | - | - | - |
-| 6.3 Concurrent Users | ⏸️ Pending | - | - | - |
-| 6.4 Error Handling | ⏸️ Pending | - | - | - |
+**Authentication & Authorization**
+- [x] E2E-1.1: User registration with valid credentials (name sanitizer removes digits by design, no JWT returned - login required)
+- [x] E2E-1.2: Login with valid credentials and token refresh (all functionality working)
+- [x] E2E-1.3: Login failure with invalid credentials (proper error handling, good security)
+- [x] E2E-1.4: Logout and session cleanup (stateless JWT behavior correct)
 
-**Status Legend:**
-- ⏸️ Pending - Not started
-- 🔄 In Progress - Currently testing
-- ✅ Pass - Test passed
-- ❌ Fail - Test failed (bug logged)
-- ⚠️ Blocked - Cannot proceed (dependency issue)
+**Test Taking Flow**
+- [ ] E2E-2.1: Starting a new test session (first test)
+- [ ] E2E-2.2: Answering questions and local storage
+- [ ] E2E-2.3: Submitting completed test and score calculation
+- [ ] E2E-2.4: Blocking second test within 6-month window
+
+**History & Analytics**
+- [ ] E2E-3.1: Viewing test history list
+- [ ] E2E-3.2: IQ score trend chart visualization
+- [ ] E2E-3.3: Viewing individual test details and responses
+- [ ] E2E-3.4: Empty state for new user with no history
+
+**Push Notifications**
+- [ ] E2E-4.1: Notification permission request on first launch
+- [ ] E2E-4.2: APNS device token registration
+- [ ] E2E-4.3: Notification scheduling (6-month cadence)
+- [ ] E2E-4.4: Notification delivery when test is due
+- [ ] E2E-4.5: Notification preference toggling (opt-out)
+
+**Question Generation Service**
+- [ ] E2E-5.1: Generate mathematical questions with Grok-4 arbiter
+- [ ] E2E-5.2: Generate questions across all types
+- [ ] E2E-5.3: Deduplication preventing duplicate questions
+- [ ] E2E-5.4: Arbiter evaluation and quality control
+
+**Integration & System**
+- [ ] E2E-6.1: Full end-to-end data flow
+- [ ] E2E-6.2: Question filtering (user hasn't seen before)
+- [ ] E2E-6.3: API rate limiting and concurrent users
+- [ ] E2E-6.4: Error handling and offline mode recovery
 
 ---
 
