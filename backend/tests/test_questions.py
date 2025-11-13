@@ -214,9 +214,9 @@ class TestGetUnseenQuestions:
         assert isinstance(question["difficulty_level"], str)
         assert question["explanation"] is None
 
-        # answer_options can be null or list
+        # answer_options can be null or dict (changed from list in schema update)
         assert question["answer_options"] is None or isinstance(
-            question["answer_options"], list
+            question["answer_options"], dict
         )
 
     def test_get_unseen_questions_question_types(

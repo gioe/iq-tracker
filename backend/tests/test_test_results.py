@@ -158,6 +158,9 @@ class TestGetTestHistory:
         self, client, auth_headers, test_questions, db_session
     ):
         """Test successfully retrieving test history."""
+        from app.models.models import TestSession
+        from datetime import datetime, timedelta
+
         # Create three completed tests with 1 question each
         # (we have 4 active questions in the fixture, so 3 tests will work)
         test_results = []
@@ -183,6 +186,16 @@ class TestGetTestHistory:
             )
             assert submit_response.status_code == 200
             test_results.append(submit_response.json()["result"])
+
+            # Backdate each completed session to bypass 6-month cadence for next test
+            # Each test is completed progressively further in the past
+            session = (
+                db_session.query(TestSession)
+                .filter(TestSession.id == session_id)
+                .first()
+            )
+            session.completed_at = datetime.utcnow() - timedelta(days=181 * (3 - i))
+            db_session.commit()
 
         # Get history
         response = client.get("/v1/test/history", headers=auth_headers)
