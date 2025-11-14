@@ -25,6 +25,7 @@ from app.core.auth import get_current_user
 from app.core.scoring import calculate_iq_score
 from app.core.config import settings
 from app.core.cache import invalidate_user_cache
+from app.core.analytics import AnalyticsTracker
 
 router = APIRouter()
 
@@ -151,6 +152,13 @@ def start_test(
 
     db.commit()
     db.refresh(test_session)
+
+    # Track analytics event
+    AnalyticsTracker.track_test_started(
+        user_id=int(current_user.id),  # type: ignore
+        session_id=int(test_session.id),  # type: ignore
+        question_count=len(unseen_questions),
+    )
 
     # Convert questions to response format
     questions_response = [
@@ -306,6 +314,13 @@ def abandon_test(
 
     db.commit()
     db.refresh(test_session)
+
+    # Track analytics event
+    AnalyticsTracker.track_test_abandoned(
+        user_id=int(current_user.id),  # type: ignore
+        session_id=session_id,
+        answered_count=responses_saved,
+    )
 
     return TestSessionAbandonResponse(
         session=TestSessionResponse.model_validate(test_session),
@@ -465,6 +480,15 @@ def submit_test(
     db.commit()
     db.refresh(test_session)
     db.refresh(test_result)
+
+    # Track analytics event
+    AnalyticsTracker.track_test_completed(
+        user_id=int(current_user.id),  # type: ignore
+        session_id=int(test_session.id),  # type: ignore
+        iq_score=score_result.iq_score,
+        duration_seconds=completion_time_seconds,
+        accuracy=score_result.accuracy_percentage,
+    )
 
     # Invalidate user's cached data after test submission
     invalidate_user_cache(int(current_user.id))  # type: ignore[arg-type]
