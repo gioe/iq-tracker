@@ -1,26 +1,40 @@
 """
 Main FastAPI application.
 """
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+import logging
 from typing import Union
-from app.core import settings
+
+from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
 from app.api.v1.api import api_router
+from app.core import settings
+from app.core.analytics import AnalyticsTracker
+from app.core.logging_config import setup_logging
+from app.middleware import (
+    PerformanceMonitoringMiddleware,
+    RequestLoggingMiddleware,
+    RequestSizeLimitMiddleware,
+    SecurityHeadersMiddleware,
+)
 from app.ratelimit import (
-    RateLimiter,
-    RateLimitMiddleware,
-    RateLimitConfig,
-    get_user_identifier,
-    TokenBucketStrategy,
-    SlidingWindowStrategy,
     FixedWindowStrategy,
     InMemoryStorage,
+    RateLimitConfig,
+    RateLimiter,
+    RateLimitMiddleware,
+    SlidingWindowStrategy,
+    TokenBucketStrategy,
+    get_user_identifier,
 )
-from app.middleware import (
-    SecurityHeadersMiddleware,
-    RequestSizeLimitMiddleware,
-    PerformanceMonitoringMiddleware,
-)
+
+# Initialize logging configuration at startup
+setup_logging()
+
+logger = logging.getLogger(__name__)
 
 # OpenAPI tags metadata
 tags_metadata = [
@@ -87,6 +101,14 @@ def create_application() -> FastAPI:
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+    )
+
+    # Configure Request Logging
+    # Add first to log all incoming requests and responses
+    app.add_middleware(
+        RequestLoggingMiddleware,
+        log_request_body=True,  # Log request bodies (except sensitive endpoints)
+        log_response_body=False,  # Don't log response bodies (can be verbose)
     )
 
     # Configure Performance Monitoring
@@ -176,6 +198,94 @@ def create_application() -> FastAPI:
 
     # Include API router
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+
+    # Exception handlers for error tracking
+    @app.exception_handler(StarletteHTTPException)
+    async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+        """
+        Handle HTTP exceptions and track them in analytics.
+        """
+        # Track API error for 4xx and 5xx errors
+        if exc.status_code >= 400:
+            # Extract user ID if available from request state
+            user_id = getattr(request.state, "user_id", None)
+
+            AnalyticsTracker.track_api_error(
+                method=request.method,
+                path=str(request.url.path),
+                error_type="HTTPException",
+                error_message=str(exc.detail),
+                user_id=user_id,
+            )
+
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ):
+        """
+        Handle request validation errors.
+        """
+        # Track validation errors
+        user_id = getattr(request.state, "user_id", None)
+
+        # Convert errors to serializable format
+        errors = []
+        for error in exc.errors():
+            error_dict = {
+                "loc": list(error.get("loc", [])),
+                "msg": str(error.get("msg", "")),
+                "type": str(error.get("type", "")),
+            }
+            # Include input if it's serializable
+            if "input" in error:
+                try:
+                    error_dict["input"] = error["input"]
+                except (TypeError, ValueError):
+                    pass
+            errors.append(error_dict)
+
+        AnalyticsTracker.track_api_error(
+            method=request.method,
+            path=str(request.url.path),
+            error_type="ValidationError",
+            error_message=str(errors),
+            user_id=user_id,
+        )
+
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content={"detail": errors},
+        )
+
+    @app.exception_handler(Exception)
+    async def generic_exception_handler(request: Request, exc: Exception):
+        """
+        Handle unexpected exceptions and track them.
+        """
+        # Log the full exception
+        logger.exception(f"Unhandled exception: {exc}")
+
+        # Track the error
+        user_id = getattr(request.state, "user_id", None)
+
+        AnalyticsTracker.track_api_error(
+            method=request.method,
+            path=str(request.url.path),
+            error_type=exc.__class__.__name__,
+            error_message=str(exc),
+            user_id=user_id,
+        )
+
+        # Return generic error response (don't leak internal details)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "Internal server error"},
+        )
 
     return app
 

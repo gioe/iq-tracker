@@ -7,6 +7,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 from typing import Callable
+from app.core.analytics import AnalyticsTracker
 
 logger = logging.getLogger(__name__)
 
@@ -54,11 +55,18 @@ class PerformanceMonitoringMiddleware(BaseHTTPMiddleware):
         # Add custom header with processing time
         response.headers["X-Process-Time"] = str(round(process_time, 4))
 
-        # Log slow requests
+        # Log slow requests and track analytics
         if process_time > self.slow_request_threshold:
             logger.warning(
                 f"Slow request: {request.method} {request.url.path} "
                 f"took {process_time:.4f}s (threshold: {self.slow_request_threshold}s)"
+            )
+            # Track slow request analytics
+            AnalyticsTracker.track_slow_request(
+                method=request.method,
+                path=str(request.url.path),
+                duration_seconds=process_time,
+                status_code=response.status_code,
             )
 
         # Log all requests in debug mode

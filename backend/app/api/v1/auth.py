@@ -14,6 +14,7 @@ from app.core.security import (
     create_refresh_token,
 )
 from app.core.auth import get_current_user, get_current_user_from_refresh_token
+from app.core.analytics import AnalyticsTracker
 
 router = APIRouter()
 
@@ -55,6 +56,12 @@ def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
+    # Track analytics event
+    AnalyticsTracker.track_user_registered(
+        user_id=int(new_user.id),  # type: ignore
+        email=new_user.email,  # type: ignore
+    )
+
     return new_user
 
 
@@ -92,6 +99,12 @@ def login_user(credentials: UserLogin, db: Session = Depends(get_db)):
     user.last_login_at = datetime.now(timezone.utc)  # type: ignore
     db.commit()
 
+    # Track analytics event
+    AnalyticsTracker.track_user_login(
+        user_id=int(user.id),  # type: ignore
+        email=user.email,  # type: ignore
+    )
+
     # Create tokens
     token_data = {"user_id": user.id, "email": user.email}
     access_token = create_access_token(token_data)
@@ -120,6 +133,14 @@ def refresh_access_token(
     Raises:
         HTTPException: 401 if refresh token is invalid
     """
+    # Track analytics event
+    from app.core.analytics import EventType
+
+    AnalyticsTracker.track_event(
+        EventType.TOKEN_REFRESHED,
+        user_id=int(current_user.id),  # type: ignore
+    )
+
     # Create new access token
     token_data = {"user_id": current_user.id, "email": current_user.email}
     access_token = create_access_token(token_data)
@@ -145,6 +166,14 @@ def logout_user(current_user: User = Depends(get_current_user)):
     Returns:
         No content (204)
     """
+    # Track analytics event
+    from app.core.analytics import EventType
+
+    AnalyticsTracker.track_event(
+        EventType.USER_LOGOUT,
+        user_id=int(current_user.id),  # type: ignore
+    )
+
     # For JWT, logout is handled client-side by discarding tokens
     # This endpoint just validates the token is valid
     return None
