@@ -138,7 +138,7 @@ class AnalyticsService {
     ///   - durationSeconds: Request duration
     ///   - statusCode: HTTP status code
     func trackSlowRequest(endpoint: String, durationSeconds: Double, statusCode: Int) {
-        let message = "⚠️ Slow API Request: \(endpoint) took \(durationSeconds, format: .fixed(precision: 2))s"
+        let message = String(format: "⚠️ Slow API Request: %@ took %.2fs", endpoint, durationSeconds)
         performanceLogger.warning("\(message) | Status: \(statusCode)")
 
         track(event: .slowAPIRequest, properties: [
