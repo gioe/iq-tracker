@@ -17,13 +17,13 @@ struct PrimaryButton: View {
                         .accessibilityHidden(true) // Hide visual loading indicator
                 }
                 Text(title)
-                    .font(.headline)
+                    .font(Typography.button)
                     .frame(maxWidth: .infinity)
             }
-            .padding()
-            .background(isDisabled ? Color.gray : Color.accentColor)
+            .padding(DesignSystem.Spacing.lg)
+            .background(isDisabled ? ColorPalette.textSecondary : ColorPalette.primary)
             .foregroundColor(.white)
-            .cornerRadius(12)
+            .cornerRadius(DesignSystem.CornerRadius.md)
         }
         .disabled(isDisabled || isLoading)
         .accessibilityLabel(title)
