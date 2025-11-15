@@ -38,7 +38,7 @@ struct DashboardView: View {
 
     private var dashboardContent: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: DesignSystem.Spacing.xxl) {
                 // Welcome Header
                 welcomeHeader
 
@@ -55,7 +55,7 @@ struct DashboardView: View {
 
                 Spacer()
             }
-            .padding()
+            .padding(DesignSystem.Spacing.lg)
         }
         .refreshable {
             await viewModel.refreshDashboard()
@@ -65,34 +65,34 @@ struct DashboardView: View {
     // MARK: - Welcome Header
 
     private var welcomeHeader: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: DesignSystem.Spacing.sm) {
             if let userName = authManager.userFullName {
                 Text("Welcome, \(userName)!")
-                    .font(.title)
-                    .fontWeight(.bold)
+                    .font(Typography.h1)
+                    .foregroundColor(ColorPalette.textPrimary)
             } else {
                 Text("Welcome!")
-                    .font(.title)
-                    .fontWeight(.bold)
+                    .font(Typography.h1)
+                    .foregroundColor(ColorPalette.textPrimary)
             }
 
             Text("Track your cognitive performance over time")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+                .font(Typography.bodyMedium)
+                .foregroundColor(ColorPalette.textSecondary)
                 .multilineTextAlignment(.center)
         }
-        .padding(.top, 20)
+        .padding(.top, DesignSystem.Spacing.xl)
     }
 
     // MARK: - Stats Grid
 
     private var statsGrid: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: DesignSystem.Spacing.lg) {
             StatCard(
                 label: "Tests Taken",
                 value: "\(viewModel.testCount)",
                 icon: "list.clipboard.fill",
-                color: .blue
+                color: ColorPalette.statBlue
             )
 
             if let avgScore = viewModel.averageScore {
@@ -100,7 +100,7 @@ struct DashboardView: View {
                     label: "Average IQ",
                     value: "\(avgScore)",
                     icon: "chart.line.uptrend.xyaxis",
-                    color: .green
+                    color: ColorPalette.statGreen
                 )
             }
         }
@@ -109,46 +109,49 @@ struct DashboardView: View {
     // MARK: - Latest Test Card
 
     private func latestTestCard(_ result: TestResult) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.md) {
             HStack {
                 Image(systemName: "clock.fill")
-                    .foregroundColor(.accentColor)
+                    .foregroundColor(ColorPalette.primary)
                 Text("Latest Test")
-                    .font(.headline)
+                    .font(Typography.h3)
                 Spacer()
             }
 
             Divider()
 
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
                     Text("IQ Score")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .font(Typography.bodySmall)
+                        .foregroundColor(ColorPalette.textSecondary)
 
                     Text("\(result.iqScore)")
-                        .font(.system(size: 36, weight: .bold))
-                        .foregroundColor(.primary)
+                        .font(Typography.displaySmall)
+                        .foregroundColor(ColorPalette.textPrimary)
                 }
 
                 Spacer()
 
-                VStack(alignment: .trailing, spacing: 4) {
+                VStack(alignment: .trailing, spacing: DesignSystem.Spacing.xs) {
                     if let dateStr = viewModel.latestTestDateFormatted {
                         Text(dateStr)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                            .font(Typography.captionMedium)
+                            .foregroundColor(ColorPalette.textSecondary)
                     }
 
                     Text("\(result.accuracyPercentage, specifier: "%.0f")% correct")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(Typography.captionMedium)
+                        .foregroundColor(ColorPalette.textSecondary)
                 }
             }
         }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
+        .padding(DesignSystem.Spacing.lg)
+        .cardStyle(
+            cornerRadius: DesignSystem.CornerRadius.md,
+            shadow: DesignSystem.Shadow.md,
+            backgroundColor: ColorPalette.backgroundSecondary
+        )
     }
 
     // MARK: - Action Button
@@ -158,12 +161,12 @@ struct DashboardView: View {
             navigateToTest = true
         } label: {
             Label("Take Another Test", systemImage: "brain.head.profile")
-                .font(.headline)
+                .font(Typography.button)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.accentColor)
-                .cornerRadius(12)
+                .padding(DesignSystem.Spacing.lg)
+                .background(ColorPalette.primary)
+                .cornerRadius(DesignSystem.CornerRadius.md)
         }
         .accessibilityLabel("Take Another Test")
         .accessibilityHint("Start a new IQ test")
@@ -174,7 +177,7 @@ struct DashboardView: View {
 
     private var emptyState: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: DesignSystem.Spacing.xxl) {
                 welcomeHeader
 
                 EmptyStateView(
@@ -189,11 +192,11 @@ struct DashboardView: View {
                         navigateToTest = true
                     }
                 )
-                .padding(.vertical, 20)
+                .padding(.vertical, DesignSystem.Spacing.xl)
 
                 Spacer()
             }
-            .padding()
+            .padding(DesignSystem.Spacing.lg)
         }
         .refreshable {
             await viewModel.refreshDashboard()
@@ -210,26 +213,29 @@ private struct StatCard: View {
     let color: Color
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: DesignSystem.Spacing.md) {
             Image(systemName: icon)
-                .font(.title)
+                .font(.system(size: DesignSystem.IconSize.lg))
                 .foregroundColor(color)
                 .accessibilityHidden(true) // Decorative icon
 
             Text(value)
-                .font(.title.weight(.bold))
-                .foregroundColor(.primary)
+                .font(Typography.statValue)
+                .foregroundColor(ColorPalette.textPrimary)
                 .accessibilityHidden(true)
 
             Text(label)
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .font(Typography.captionMedium)
+                .foregroundColor(ColorPalette.textSecondary)
                 .accessibilityHidden(true)
         }
         .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
+        .padding(DesignSystem.Spacing.lg)
+        .cardStyle(
+            cornerRadius: DesignSystem.CornerRadius.md,
+            shadow: DesignSystem.Shadow.sm,
+            backgroundColor: ColorPalette.backgroundSecondary
+        )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(label): \(value)")
     }
