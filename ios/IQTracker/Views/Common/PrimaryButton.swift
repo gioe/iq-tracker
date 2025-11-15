@@ -42,11 +42,9 @@ struct PrimaryButton: View {
     }
 
     private var accessibilityTraits: AccessibilityTraits {
-        var traits: AccessibilityTraits = [.isButton]
-        if isDisabled || isLoading {
-            traits.insert(.isNotEnabled)
-        }
-        return traits
+        // .isButton is the only trait we need
+        // The .disabled() modifier automatically handles accessibility for disabled state
+        [.isButton]
     }
 }
 
