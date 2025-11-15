@@ -9,7 +9,7 @@ struct TestResultsView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 32) {
+                VStack(spacing: DesignSystem.Spacing.xxxl) {
                     // IQ Score - Main highlight
                     iqScoreCard
 
@@ -22,9 +22,9 @@ struct TestResultsView: View {
                     // Action buttons
                     actionButtons
                 }
-                .padding()
+                .padding(DesignSystem.Spacing.lg)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(ColorPalette.backgroundGrouped)
             .navigationTitle("Test Results")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -37,7 +37,7 @@ struct TestResultsView: View {
                 }
             }
             .onAppear {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.1)) {
+                withAnimation(DesignSystem.Animation.smooth.delay(0.1)) {
                     showAnimation = true
                 }
             }
@@ -47,37 +47,25 @@ struct TestResultsView: View {
     // MARK: - IQ Score Card
 
     private var iqScoreCard: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: DesignSystem.Spacing.lg) {
             // Trophy icon
             Image(systemName: "trophy.fill")
-                .font(.system(size: 50))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.yellow, .orange],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .font(.system(size: DesignSystem.IconSize.xl))
+                .foregroundStyle(ColorPalette.trophyGradient)
                 .scaleEffect(showAnimation ? 1.0 : 0.5)
                 .opacity(showAnimation ? 1.0 : 0.0)
                 .accessibilityHidden(true) // Decorative icon
 
             // IQ Score
-            VStack(spacing: 4) {
+            VStack(spacing: DesignSystem.Spacing.xs) {
                 Text("Your IQ Score")
-                    .font(.headline)
-                    .foregroundColor(.secondary)
+                    .font(Typography.h3)
+                    .foregroundColor(ColorPalette.textSecondary)
                     .accessibilityHidden(true) // Redundant with full label below
 
                 Text("\(result.iqScore)")
-                    .font(.system(size: 72, weight: .bold, design: .rounded))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.blue, .purple],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
+                    .font(Typography.scoreDisplay)
+                    .foregroundStyle(ColorPalette.scoreGradient)
                     .scaleEffect(showAnimation ? 1.0 : 0.8)
                     .opacity(showAnimation ? 1.0 : 0.0)
                     .accessibilityLabel("Your IQ Score is \(result.iqScore)")
@@ -86,53 +74,55 @@ struct TestResultsView: View {
 
             // IQ Range context
             Text(iqRangeDescription)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+                .font(Typography.bodyMedium)
+                .foregroundColor(ColorPalette.textSecondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal)
+                .padding(.horizontal, DesignSystem.Spacing.lg)
                 .opacity(showAnimation ? 1.0 : 0.0)
                 .accessibilityHidden(true) // Already included in hint above
         }
-        .padding(24)
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        .padding(DesignSystem.Spacing.xxl)
+        .cardStyle(
+            cornerRadius: DesignSystem.CornerRadius.lg,
+            shadow: DesignSystem.Shadow.md,
+            backgroundColor: ColorPalette.background
+        )
         .accessibilityElement(children: .combine)
     }
 
     // MARK: - Metrics Grid
 
     private var metricsGrid: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 12) {
+        VStack(spacing: DesignSystem.Spacing.md) {
+            HStack(spacing: DesignSystem.Spacing.md) {
                 metricCard(
                     icon: "percent",
                     title: "Accuracy",
                     value: String(format: "%.1f%%", result.accuracyPercentage),
-                    color: .green
+                    color: ColorPalette.statGreen
                 )
 
                 metricCard(
                     icon: "checkmark.circle.fill",
                     title: "Correct",
                     value: "\(result.correctAnswers)/\(result.totalQuestions)",
-                    color: .blue
+                    color: ColorPalette.statBlue
                 )
             }
 
-            HStack(spacing: 12) {
+            HStack(spacing: DesignSystem.Spacing.md) {
                 metricCard(
                     icon: "clock.fill",
                     title: "Time",
                     value: result.completionTimeFormatted,
-                    color: .orange
+                    color: ColorPalette.statOrange
                 )
 
                 metricCard(
                     icon: "calendar",
                     title: "Completed",
                     value: formatDate(result.completedAt),
-                    color: .purple
+                    color: ColorPalette.statPurple
                 )
             }
         }
@@ -141,29 +131,31 @@ struct TestResultsView: View {
     }
 
     private func metricCard(icon: String, title: String, value: String, color: Color) -> some View {
-        VStack(spacing: 12) {
+        VStack(spacing: DesignSystem.Spacing.md) {
             Image(systemName: icon)
-                .font(.system(size: 24))
+                .font(.system(size: DesignSystem.IconSize.md))
                 .foregroundColor(color)
                 .accessibilityHidden(true) // Decorative icon
 
-            VStack(spacing: 4) {
+            VStack(spacing: DesignSystem.Spacing.xs) {
                 Text(value)
-                    .font(.title3)
-                    .fontWeight(.semibold)
+                    .font(Typography.h3)
+                    .foregroundColor(ColorPalette.textPrimary)
                     .accessibilityHidden(true)
 
                 Text(title)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .font(Typography.captionMedium)
+                    .foregroundColor(ColorPalette.textSecondary)
                     .accessibilityHidden(true)
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 1)
+        .padding(.vertical, DesignSystem.Spacing.xl)
+        .cardStyle(
+            cornerRadius: DesignSystem.CornerRadius.md,
+            shadow: DesignSystem.Shadow.sm,
+            backgroundColor: ColorPalette.background
+        )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title): \(value)")
     }
@@ -171,21 +163,21 @@ struct TestResultsView: View {
     // MARK: - Performance Message
 
     private var performanceMessage: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: DesignSystem.Spacing.md) {
             Text(performanceTitle)
-                .font(.headline)
+                .font(Typography.h3)
 
             Text(performanceDescription)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+                .font(Typography.bodyMedium)
+                .foregroundColor(ColorPalette.textSecondary)
                 .multilineTextAlignment(.center)
         }
-        .padding()
+        .padding(DesignSystem.Spacing.lg)
         .frame(maxWidth: .infinity)
         .background(performanceBackgroundColor.opacity(0.1))
-        .cornerRadius(12)
+        .cornerRadius(DesignSystem.CornerRadius.md)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
                 .stroke(performanceBackgroundColor.opacity(0.3), lineWidth: 1)
         )
         .opacity(showAnimation ? 1.0 : 0.0)
@@ -195,7 +187,7 @@ struct TestResultsView: View {
     // MARK: - Action Buttons
 
     private var actionButtons: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: DesignSystem.Spacing.md) {
             Button {
                 // swiftlint:disable:next todo
                 // TODO: Navigate to detailed breakdown (future feature)
@@ -206,7 +198,7 @@ struct TestResultsView: View {
                     Text("View Detailed Breakdown")
                 }
                 .frame(maxWidth: .infinity)
-                .fontWeight(.semibold)
+                .font(Typography.button)
             }
             .buttonStyle(.bordered)
             .accessibilityLabel("View Detailed Breakdown")
@@ -216,6 +208,7 @@ struct TestResultsView: View {
                 onDismiss()
             } label: {
                 Text("Return to Dashboard")
+                    .font(Typography.button)
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)

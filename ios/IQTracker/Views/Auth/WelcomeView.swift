@@ -8,22 +8,22 @@ struct WelcomeView: View {
         NavigationStack {
             ZStack {
                 ScrollView {
-                    VStack(spacing: 32) {
+                    VStack(spacing: DesignSystem.Spacing.xxxl) {
                         // Header
-                        VStack(spacing: 12) {
+                        VStack(spacing: DesignSystem.Spacing.md) {
                             Text("IQ Tracker")
-                                .font(.system(size: 42, weight: .bold))
-                                .foregroundColor(.accentColor)
+                                .font(Typography.displayMedium)
+                                .foregroundColor(ColorPalette.primary)
 
                             Text("Track your cognitive performance over time")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .font(Typography.bodyMedium)
+                                .foregroundColor(ColorPalette.textSecondary)
                                 .multilineTextAlignment(.center)
                         }
-                        .padding(.top, 60)
+                        .padding(.top, DesignSystem.Spacing.section)
 
                         // Login Form
-                        VStack(spacing: 20) {
+                        VStack(spacing: DesignSystem.Spacing.xl) {
                             CustomTextField(
                                 title: "Email",
                                 placeholder: "your.email@example.com",
@@ -34,8 +34,8 @@ struct WelcomeView: View {
 
                             if let emailError = viewModel.emailError {
                                 Text(emailError)
-                                    .font(.caption)
-                                    .foregroundColor(.red)
+                                    .font(Typography.captionMedium)
+                                    .foregroundColor(ColorPalette.error)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
 
@@ -48,8 +48,8 @@ struct WelcomeView: View {
 
                             if let passwordError = viewModel.passwordError {
                                 Text(passwordError)
-                                    .font(.caption)
-                                    .foregroundColor(.red)
+                                    .font(Typography.captionMedium)
+                                    .foregroundColor(ColorPalette.error)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
 
@@ -63,7 +63,7 @@ struct WelcomeView: View {
                                 isLoading: viewModel.isLoading,
                                 isDisabled: !viewModel.isFormValid
                             )
-                            .padding(.top, 8)
+                            .padding(.top, DesignSystem.Spacing.sm)
                         }
 
                         // Error Display
@@ -77,10 +77,10 @@ struct WelcomeView: View {
                         }
 
                         // Registration Link
-                        VStack(spacing: 12) {
+                        VStack(spacing: DesignSystem.Spacing.md) {
                             Text("Don't have an account?")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .font(Typography.bodyMedium)
+                                .foregroundColor(ColorPalette.textSecondary)
 
                             Button(
                                 action: {
@@ -88,16 +88,16 @@ struct WelcomeView: View {
                                 },
                                 label: {
                                     Text("Create Account")
-                                        .font(.headline)
-                                        .foregroundColor(.accentColor)
+                                        .font(Typography.button)
+                                        .foregroundColor(ColorPalette.primary)
                                 }
                             )
                         }
-                        .padding(.top, 8)
+                        .padding(.top, DesignSystem.Spacing.sm)
 
                         Spacer()
                     }
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, DesignSystem.Spacing.xxl)
                 }
 
                 // Loading overlay

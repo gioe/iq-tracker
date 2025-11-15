@@ -23,25 +23,24 @@ struct EmptyStateView: View {
     }
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: DesignSystem.Spacing.xxl) {
             Spacer()
 
             Image(systemName: icon)
-                .font(.system(size: 64))
-                .foregroundColor(.accentColor.opacity(0.6))
+                .font(.system(size: DesignSystem.IconSize.huge))
+                .foregroundColor(ColorPalette.primary.opacity(0.6))
                 .accessibilityHidden(true) // Decorative icon
 
-            VStack(spacing: 12) {
+            VStack(spacing: DesignSystem.Spacing.md) {
                 Text(title)
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
+                    .font(Typography.h2)
+                    .foregroundColor(ColorPalette.textPrimary)
 
                 Text(message)
-                    .font(.body)
-                    .foregroundColor(.secondary)
+                    .font(Typography.bodyMedium)
+                    .foregroundColor(ColorPalette.textSecondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
+                    .padding(.horizontal, DesignSystem.Spacing.huge)
             }
             .accessibilityElement(children: .combine)
             .accessibilityLabel("\(title). \(message)")
@@ -49,15 +48,15 @@ struct EmptyStateView: View {
             if let actionTitle, let action {
                 Button(action: action) {
                     Text(actionTitle)
-                        .font(.headline)
+                        .font(Typography.button)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.accentColor)
-                        .cornerRadius(12)
+                        .padding(DesignSystem.Spacing.lg)
+                        .background(ColorPalette.primary)
+                        .cornerRadius(DesignSystem.CornerRadius.md)
                 }
-                .padding(.horizontal, 40)
-                .padding(.top, 8)
+                .padding(.horizontal, DesignSystem.Spacing.huge)
+                .padding(.top, DesignSystem.Spacing.sm)
                 .accessibilityLabel(actionTitle)
                 .accessibilityHint("Activate to \(actionTitle.lowercased())")
             }
