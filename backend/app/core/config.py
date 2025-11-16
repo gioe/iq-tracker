@@ -58,6 +58,14 @@ class Settings(BaseSettings):
     APNS_KEY_PATH: str = ""  # Path to .p8 key file
     APNS_USE_SANDBOX: bool = True  # Use sandbox APNs server for development
 
+    # Admin Dashboard
+    ADMIN_ENABLED: bool = False  # Set to True to enable admin dashboard
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = Field(
+        default="",
+        description="Admin dashboard password (required when ADMIN_ENABLED=True)",
+    )
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

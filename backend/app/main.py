@@ -9,6 +9,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.v1.api import api_router
 from app.core import settings
@@ -93,6 +94,18 @@ def create_application() -> FastAPI:
         openapi_url=f"{settings.API_V1_PREFIX}/openapi.json",
         openapi_tags=tags_metadata,
     )
+
+    # Configure Session Middleware (required for admin authentication)
+    # Only add if admin is enabled
+    if settings.ADMIN_ENABLED:
+        app.add_middleware(
+            SessionMiddleware,
+            secret_key=settings.SECRET_KEY,
+            session_cookie="admin_session",
+            max_age=14400,  # 4 hours
+            same_site="lax",
+            https_only=settings.ENV == "production",
+        )
 
     # Configure CORS
     app.add_middleware(
@@ -198,6 +211,38 @@ def create_application() -> FastAPI:
 
     # Include API router
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+
+    # Setup Admin Dashboard (only if enabled)
+    if settings.ADMIN_ENABLED:
+        from sqladmin import Admin
+        from app.admin import (
+            AdminAuth,
+            UserAdmin,
+            QuestionAdmin,
+            UserQuestionAdmin,
+            TestSessionAdmin,
+            ResponseAdmin,
+            TestResultAdmin,
+        )
+        from app.models import engine
+
+        admin = Admin(
+            app=app,
+            engine=engine,
+            title="IQ Tracker Admin",
+            base_url="/admin",
+            authentication_backend=AdminAuth(secret_key=settings.SECRET_KEY),
+        )
+
+        # Register admin views
+        admin.add_view(UserAdmin)
+        admin.add_view(QuestionAdmin)
+        admin.add_view(UserQuestionAdmin)
+        admin.add_view(TestSessionAdmin)
+        admin.add_view(ResponseAdmin)
+        admin.add_view(TestResultAdmin)
+
+        logger.info("Admin dashboard enabled at /admin")
 
     # Exception handlers for error tracking
     @app.exception_handler(StarletteHTTPException)
