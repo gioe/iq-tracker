@@ -713,7 +713,7 @@ arbiters:
 **Goal:** Deploy to production and submit to App Store
 
 **Tasks:**
-- [ ] **P9-001**: Choose cloud hosting provider (AWS/GCP/Azure)
+- [x] **P9-001**: Choose cloud hosting provider (AWS/GCP/Azure)
 - [ ] **P9-002**: Set up production database
 - [ ] **P9-003**: Set up CI/CD pipelines
 - [ ] **P9-004**: Deploy backend to production
