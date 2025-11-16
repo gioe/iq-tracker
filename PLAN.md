@@ -856,7 +856,7 @@ arbiters:
   - Reference: IQ_METHODOLOGY_DIVERGENCE_ANALYSIS.txt, lines 890-905
 
 **Database Schema for Future Validation:**
-- [ ] **P11-007**: Add question statistics fields to database
+- [x] **P11-007**: Add question statistics fields to database
   - Add columns: empirical_difficulty (float), discrimination (float), response_count (int)
   - Add columns: irt_difficulty, irt_discrimination, irt_guessing (for future IRT)
   - Migration script
