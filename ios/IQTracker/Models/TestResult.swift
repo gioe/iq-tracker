@@ -60,6 +60,7 @@ struct TestResult: Codable, Identifiable, Equatable {
         case testSessionId = "test_session_id"
         case userId = "user_id"
         case iqScore = "iq_score"
+        case percentileRank = "percentile_rank"
         case totalQuestions = "total_questions"
         case correctAnswers = "correct_answers"
         case accuracyPercentage = "accuracy_percentage"
