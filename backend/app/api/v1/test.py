@@ -32,7 +32,6 @@ from app.core.test_composition import select_stratified_questions
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-
 @router.post("/start", response_model=StartTestResponse)
 def start_test(
     question_count: int = Query(
