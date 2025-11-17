@@ -80,7 +80,7 @@ def create_application() -> FastAPI:
             "Most endpoints require authentication using JWT Bearer tokens. "
             "Obtain tokens via the `/v1/auth/login` endpoint.\n\n"
             "## Testing Cadence\n\n"
-            "Users are recommended to take tests every 6 months for optimal cognitive tracking."
+            "Users are recommended to take tests every 3 months for optimal cognitive tracking."
         ),
         contact={
             "name": "IQ Tracker Support",
