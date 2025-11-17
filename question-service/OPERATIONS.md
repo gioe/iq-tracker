@@ -269,7 +269,7 @@ The service is designed for periodic execution. Multiple scheduling options are 
 **For MVP**: Weekly on Sunday nights at 2:00 AM
 
 **Rationale**:
-- Generates ~50 questions per week (sufficient for 6-month testing cadence)
+- Generates ~50 questions per week (sufficient for 3-month testing cadence)
 - Low server load time
 - Allows monitoring before user traffic
 - Can be adjusted based on user growth

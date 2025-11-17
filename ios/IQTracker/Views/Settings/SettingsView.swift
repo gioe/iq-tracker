@@ -31,7 +31,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Notifications")
                 } footer: {
-                    Text("Receive reminders when it's time to take your next IQ test (every 6 months)")
+                    Text("Receive reminders when it's time to take your next IQ test (every 3 months)")
                         .font(.caption)
                 }
 

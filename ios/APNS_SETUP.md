@@ -128,7 +128,7 @@ APNS_ENVIRONMENT=development  # Use 'production' for App Store builds
 The backend implementation will include:
 
 - **P7-002**: Device token registration endpoint (`POST /v1/notifications/register-device`)
-- **P7-003**: Notification scheduling logic (6-month cadence)
+- **P7-003**: Notification scheduling logic (3-month cadence)
 - **P7-004**: APNs integration using the PyAPNs2 library
 
 ---
