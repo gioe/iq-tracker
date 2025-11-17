@@ -1,6 +1,6 @@
 """
 Notification scheduling service for determining which users should receive
-test reminder notifications based on the 6-month testing cadence.
+test reminder notifications based on the 3-month testing cadence.
 """
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
@@ -270,7 +270,7 @@ class NotificationScheduler:
                 continue
 
             title = "Time for Your IQ Test!"
-            body = f"Hi {user.first_name}, it's been 6 months! Ready to track your cognitive progress?"
+            body = f"Hi {user.first_name}, it's been 3 months! Ready to track your cognitive progress?"
 
             notifications.append(
                 {

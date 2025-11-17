@@ -34,7 +34,7 @@ The question generation service is designed to run periodically to maintain a fr
 
 **Rationale**:
 - Low server load time
-- Generates ~50 questions per week (sufficient for 6-month testing cadence)
+- Generates ~50 questions per week (sufficient for 3-month testing cadence)
 - Allows monitoring and intervention before user traffic
 - Can be adjusted based on user growth
 

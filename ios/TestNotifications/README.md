@@ -118,7 +118,7 @@ pytest tests/test_notification_integration.py -v
 
 **Tests Cover:**
 - User filtering logic (who gets notified)
-- Test cadence calculations (6-month schedule)
+- Test cadence calculations (3-month schedule)
 - Notification payload formatting
 - Edge cases (no device token, notifications disabled, etc.)
 

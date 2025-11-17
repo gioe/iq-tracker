@@ -244,9 +244,9 @@ async def send_test_reminder_notification(
 
         title = "Time for Your IQ Test!"
         if user_name:
-            body = f"Hi {user_name}, it's been 6 months! Ready to track your cognitive progress?"
+            body = f"Hi {user_name}, it's been 3 months! Ready to track your cognitive progress?"
         else:
-            body = "It's been 6 months! Ready to track your cognitive progress?"
+            body = "It's been 3 months! Ready to track your cognitive progress?"
 
         result = await service.send_notification(
             device_token=device_token,

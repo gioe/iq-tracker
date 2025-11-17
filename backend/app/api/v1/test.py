@@ -101,7 +101,7 @@ def start_test(
 
         raise HTTPException(
             status_code=400,
-            detail=f"You must wait {settings.TEST_CADENCE_DAYS} days (6 months) between tests. "
+            detail=f"You must wait {settings.TEST_CADENCE_DAYS} days (3 months) between tests. "
             f"Your last test was completed on {recent_completed_session.completed_at.strftime('%Y-%m-%d')}. "
             f"You can take your next test on {next_eligible.strftime('%Y-%m-%d')} "
             f"({days_remaining} days remaining).",
