@@ -7,8 +7,8 @@ enum AppConfig {
         #if DEBUG
             return "http://localhost:8000"
         #else
-            // Note: Production URL to be configured during deployment (Phase 9)
-            return "https://api.aiq.app"
+            // Railway production backend
+            return "https://aiq-backend-production.up.railway.app/v1"
         #endif
     }
 
