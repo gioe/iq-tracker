@@ -77,6 +77,10 @@ class Settings(BaseSettings):
         default="",
         description="Admin dashboard password (required when ADMIN_ENABLED=True)",
     )
+    ADMIN_TOKEN: str = Field(
+        default="",
+        description="Admin API token for triggering jobs (required for admin endpoints)",
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
