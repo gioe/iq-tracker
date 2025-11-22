@@ -71,7 +71,9 @@ def write_heartbeat(
     heartbeat_file = Path("./logs/heartbeat.json")
     heartbeat_file.parent.mkdir(parents=True, exist_ok=True)
 
-    data = {
+    from typing import Any, Dict
+
+    data: Dict[str, Any] = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "status": status,
         "hostname": os.uname().nodename if hasattr(os, "uname") else "unknown",
